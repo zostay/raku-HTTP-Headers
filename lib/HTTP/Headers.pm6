@@ -93,13 +93,20 @@ role HTTP::Header {
     }
 
     method set-param($name, $new-value) {
+        my $found = False;
         @!values = do for @(self.prepared-values) -> $prep-value {
-            my @pairs = try { self.prepared-values».comb(/ <-[ ; ]>+ /) };
+            my @pairs = try { $prep-value.comb(/ <-[ ; ]>+ /) };
             my @result-pairs = do for @pairs {
-                when /'='/ {
+                when !$found && /'='/ { # only change the first
                     my ($key, $value) = .split('=', 2);
-                    if ($key.trim.lc eq $name.lc) {
-                        "{$key.trim}={$new-value.trim}"
+                    if ($key.trim.lc eq $name.trim.lc) {
+                        $found++;
+                        if ($new-value.defined) {
+                            "{$key.trim}={$new-value.trim}"
+                        }
+                        else {
+                            ()
+                        }
                     }
                     else {
                         $_
@@ -107,6 +114,9 @@ role HTTP::Header {
                 }
                 default { $_ }
             };
+
+            @result-pairs.push: "{$name.trim}={$new-value.trim}"
+                unless $found;
 
             @result-pairs.join('; ');
         }
