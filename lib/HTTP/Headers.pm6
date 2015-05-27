@@ -59,10 +59,27 @@ role HTTP::Header {
         }
     }
 
-    method value { self.prepared-values.join(', ') }
+    method value is rw { 
+        my $self = self;
+        Proxy.new(
+            FETCH => method ()     { $self.prepared-values.join(', ') },
+            STORE => method ($new) { $self.values = $new },
+        );
+    }
 
     method primary {
-        try { self.prepared-values[0].comb(/ <-[ ; ]>+ /)[0].trim }
+        Proxy.new(
+            FETCH => method () {
+                try { self.prepared-values[0].comb(/ <-[ ; ]>+ /)[0].trim }
+            },
+            STORE => method ($new) {
+                my $value = @(self.prepared-values)[0];
+                my @items = try { $value.comb(/ <-[ ; ]>+ /, 2) };
+                @items[0] = $new.trim;
+                @!values[0] = @items.join('; ');
+                $new.trim;
+            },
+        );
     }
 
     method params {
