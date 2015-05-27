@@ -1,5 +1,6 @@
 use v6;
 
+#| Enumeration of standard headers
 enum HTTP::Header::Standard::Name is export 
     # General, Request, Response, Entity Headers
     <
@@ -19,6 +20,7 @@ enum HTTP::Header::Standard::Name is export
         Expires Last-Modified
     >;
 
+#| Performs a reverse lookup of headers by header name
 sub standard-header-by-name($name) returns HTTP::Header::Standard::Name is export {
     my $v = HTTP::Header::Standard::Name.enums{$name};
     if $v.defined {
@@ -31,11 +33,14 @@ sub standard-header-by-name($name) returns HTTP::Header::Standard::Name is expor
 
 class HTTP::Headers { ... }
 
+#| Role for defining all header objects
 role HTTP::Header {
-    has @.values is rw;
+    has @.values is rw; #= The values stored by a header
 
     my @dow = <Mon Tue Wed Thu Fri Sat Sun>;
     my @moy = <Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec>;
+
+    #| Convert objects stored into appropriately formatted strings
     method prepared-values {
         do for @!values -> $value is copy {
             given $value {
@@ -59,6 +64,7 @@ role HTTP::Header {
         }
     }
 
+    #| Treat the values of this header as a single value
     method value is rw { 
         my $self = self;
         Proxy.new(
@@ -67,6 +73,7 @@ role HTTP::Header {
         );
     }
 
+    #| Retrieve the primary value out of the header value
     method primary {
         Proxy.new(
             FETCH => method () {
@@ -82,6 +89,7 @@ role HTTP::Header {
         );
     }
 
+    #| Retrieve all the parameters associated with this header value
     method params {
         my %result;
         my @pairs = try { self.prepared-values».comb(/ <-[ ; ]>+ /)».grep(/'='/) };
@@ -92,6 +100,7 @@ role HTTP::Header {
         %result;
     }
 
+    #| Set a header value on the string (this is semi-internal)
     method set-param($name, $new-value) {
         my $found = False;
         @!values = do for @(self.prepared-values) -> $prep-value {
@@ -122,6 +131,7 @@ role HTTP::Header {
         }
     }
 
+    #| Read/write a parameter set within a value
     method param($name) is rw {
         my $self = self;
         Proxy.new(
@@ -130,24 +140,30 @@ role HTTP::Header {
         );
     }
 
+    #| Read the individual values as an array lookup
     method AT-POS($index) { @!values[$index] }
 
-    method name { }
-    method key returns Str { self.name.lc }
+    # TODO Why can't I make this a stub ... ?
 
-    method push(*@values) { @!values.push: @values }
-    method unshift(*@values) { @!values.push: @values }
-    method shift() { @!values.shift }
-    method pop() { @!values.pop }
+    method name { } #= The name of the header
+    method key returns Str { self.name.lc } #= The header lookup key
 
+    method push(*@values) { @!values.push: @values } #= Push values into the header
+    method unshift(*@values) { @!values.push: @values } #= Unshift values into the header
+    method shift() { @!values.shift } #= Shift values off the header
+    method pop() { @!values.pop } #= Pop values off the header
+
+    #| Set the given values only if the header has none already
     method init(*@values) {
         unless @!values {
             @!values = @values;
         }
     }
     
+    #| Remove all values from this header
     method remove() { @!values = () }
 
+    #| Output the header in Name: Value form for each value
     method as-string(Str :$eol = "\n") {
         my @values = self.prepared-values;
         my @lines = do for @values -> $value {
@@ -156,12 +172,13 @@ role HTTP::Header {
         @lines.join($eol);
     }
 
-    method Bool { ?@!values }
-    method Str  { self.value }
-    method list { self.prepared-values }
+    method Bool { ?@!values } #= True if this header has values
+    method Str  { self.value } #= Same as calling .value
+    method list { self.prepared-values } #= Same as calling .prepared-values
 }
 
-class HTTP::Header::Standard is HTTP::Header {
+#| A standard header definition
+class HTTP::Header::Standard does HTTP::Header {
     has HTTP::Header::Standard::Name $.name;
 
     method clone {
@@ -171,27 +188,29 @@ class HTTP::Header::Standard is HTTP::Header {
     }
 }
 
+#| A Content-Type header definition
 role HTTP::Header::Standard::Content-Type {
-    method is-text { ?(self.primary ~~ /^ "text/" /) }
-    method is-html { self.primary eq 'text/html' || self.is-xhtml }
-    method is-xhtml { 
+    method is-text { ?(self.primary ~~ /^ "text/" /) } #= True if the Content-Type is text/*
+    method is-html { self.primary eq 'text/html' || self.is-xhtml } #= True if Content-Type is text/html or .is-xhtml
+    method is-xhtml { #= True if Content-Type is xhtml
         ?(self.primary ~~ any(<
             application/xhtml+xml
             application/vnd.wap.xhtml+xml
         >));
     }
-    method is-xml {
+    method is-xml { #= True if Content-Type is xml
         ?(self.primary ~~ any(<
             text/xml
             application/xml
         >, /"+xml"/));
     }
 
+    #| Read or write the charset parameter
     method charset is rw { self.param('charset') }
-
 }
 
-class HTTP::Header::Custom is HTTP::Header {
+#| A custom header definition
+class HTTP::Header::Custom does HTTP::Header {
     has Str $.name;
 
     submethod BUILD(:$!name) {
@@ -205,10 +224,12 @@ class HTTP::Header::Custom is HTTP::Header {
     }
 }
 
+#! A group of headers
 class HTTP::Headers {
-    has HTTP::Header %.headers;
-    has Bool $.quiet = False;
+    has HTTP::Header %.headers; #= Internal header storage... no touchy
+    has Bool $.quiet = False; #= Silence all warnings
 
+    #| Helper for building header objects
     method build-header($name, *@values) returns HTTP::Header { 
         if my $std = standard-header-by-name($name) {
             my $h = HTTP::Header::Standard.new(:name($std), :@values);
@@ -224,15 +245,18 @@ class HTTP::Headers {
         }
     }
 
-    method AT-KEY($key)             { self.header($key) }
-    method ASSIGN-KEY($key, $value) { self.header($key) = $value }
-    method DELETE-KEY($key)         { self.remove-header($key) }
-    method EXISTS-KEY($key)         { ?self.header($key) }
+    method AT-KEY($key)             { self.header($key) } #= use $headers{*} to fetch headers
+    method ASSIGN-KEY($key, $value) { self.header($key) = $value } #= use $headers{*} to set headers
+    method DELETE-KEY($key)         { self.remove-header($key) } #= use $headers{*} :delete to remove headers
+    method EXISTS-KEY($key)         { ?self.header($key) } #= use $headers{*} :exists to test for the existance of a header
 
+    #| Returns the number of headers set
     method elems { self.vacuum; %!headers.elems }
 
+    #| Returns the headers as a sorted list
     method list { self.sorted-headers }
 
+    #| Performs a safe deep clone of the headers
     method clone {
         my HTTP::Headers $obj .= new;
         for %!headers.kv -> $k, $v {
@@ -241,6 +265,7 @@ class HTTP::Headers {
         $obj;
     }
 
+    #| Helper for use by .header()
     method header-proxy($name) {
         my $tmp = self.build-header($name);
         my $h = %!headers{$tmp.key} //= $tmp;
@@ -250,10 +275,12 @@ class HTTP::Headers {
         );
     }
 
+    #| Read or write a standard header
     multi method header(HTTP::Header::Standard::Name $name) is rw returns HTTP::Header {
         self.header-proxy($name);
     }
 
+    #| Read or write a custom header
     multi method header(Str $name, :$quiet = False) is rw returns HTTP::Header {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
             if !$!quiet && !$quiet && standard-header-by-name($name).defined;
@@ -261,11 +288,13 @@ class HTTP::Headers {
         self.header-proxy($name);
     }
 
+    #| Remove a header
     method remove-header($name) {
         my $tmp = self.build-header($name);
         %!headers{$tmp.key} :delete;
     }
 
+    #| Remove more than one header
     method remove-headers(*@names) {
         do for @names -> $name {
             my $tmp = self.build-header($name);
@@ -273,6 +302,7 @@ class HTTP::Headers {
         }
     }
 
+    #| Remove all the entity and Content-* headers
     method remove-content-headers {
         self.remove-headers( %!headers.keys.grep(/^ content "-"/), <
             Allow Content-Encoding Content-Language Content-Length
@@ -281,14 +311,17 @@ class HTTP::Headers {
         >);
     }
 
+    #| Remove all headers
     method clear { %!headers = () }
 
+    #| Clean up header objects that have no values
     method vacuum {
         for %!headers.kv -> $k, $v {
             %!headers{$k} :delete if !$v;
         }
     }
 
+    #| Return the headers as a sorted list
     method sorted-headers {
         self.vacuum;
 
@@ -310,10 +343,12 @@ class HTTP::Headers {
         }
     }
 
+    #| Iterate over the headers in sorted order
     method for(&code) {
         self.sorted-headers.for: &code;
     }
 
+    #| Output the headers as a string in sorted order
     method as-string(Str :$eol = "\n") {
         self.vacuum;
 
@@ -325,8 +360,10 @@ class HTTP::Headers {
         $string;
     }
 
+    #! Same as as-string
     method Str { self.as-string }
 
+    #| Return the headers as a list of Pairs for use with PSGI
     method for-PSGI {
         self.for: -> $h { 
             do for $h.prepared-values -> $v {
