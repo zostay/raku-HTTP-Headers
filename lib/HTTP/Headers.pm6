@@ -190,9 +190,9 @@ class HTTP::Headers {
         self.header-proxy($name);
     }
 
-    multi method header(Str $name) is rw returns HTTP::Header {
+    multi method header(Str $name, :$quiet = False) is rw returns HTTP::Header {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
-            if HTTP::Headers::Standard($name);
+            if !$quiet && HTTP::Headers::Standard($name);
 
         self.header-proxy($name);
     }
