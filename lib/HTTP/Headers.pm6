@@ -33,7 +33,6 @@ class HTTP::Headers { ... }
 
 role HTTP::Header {
     has @.values is rw;
-    has Bool $.quiet = False;
 
     my @dow = <Mon Tue Wed Thu Fri Sat Sun>;
     my @moy = <Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec>;
@@ -181,6 +180,7 @@ class HTTP::Header::Custom is HTTP::Header {
 
 class HTTP::Headers {
     has HTTP::Header %.headers;
+    has Bool $.quiet = False;
 
     method build-header($name, *@values) returns HTTP::Header { 
         if my $std = standard-header-by-name($name) {
