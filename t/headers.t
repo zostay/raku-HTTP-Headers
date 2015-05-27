@@ -173,6 +173,8 @@ $h.clear;
 $h.Content-Type = 'text/html; charset=UTF-8';
 is($h.Content-Type.primary, 'text/html');
 is($h.Content-Type.charset, 'UTF-8');
+$h.Content-Type.charset = 'ISO-8859-1';
+is(~$h.Content-Type, 'text/html; charset=ISO-8859-1');
 is($h.Content-Type.is-html, True);
 is($h.Content-Type.is-text, True);
 is($h.Content-Type.is-xhtml, False);

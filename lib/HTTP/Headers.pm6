@@ -65,6 +65,34 @@ role HTTP::Header {
         %result;
     }
 
+    method set-param($name, $new-value) {
+        @!values = do for @(self.prepared-values) -> $prep-value {
+            my @pairs = try { self.prepared-values».comb(/ <-[ ; ]>+ /) };
+            my @result-pairs = do for @pairs {
+                when /'='/ {
+                    my ($key, $value) = .split('=', 2);
+                    if ($key.trim.lc eq $name.lc) {
+                        "{$key.trim}={$new-value.trim}"
+                    }
+                    else {
+                        $_
+                    }
+                }
+                default { $_ }
+            };
+
+            @result-pairs.join('; ');
+        }
+    }
+
+    method param($name) is rw {
+        my $self = self;
+        Proxy.new(
+            FETCH => method ()     { $self.params{$name} },
+            STORE => method ($new) { $self.set-param($name, $new) },
+        );
+    }
+
     method AT-POS($index) { @!values[$index] }
 
     method name { }
@@ -122,9 +150,7 @@ role HTTP::Header::Standard::Content-Type {
         >, /"+xml"/));
     }
 
-    method charset {
-        self.params<charset>
-    }
+    method charset is rw { self.param('charset') }
 
 }
 
