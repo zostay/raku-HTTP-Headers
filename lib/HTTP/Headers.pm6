@@ -158,7 +158,7 @@ role HTTP::Header {
 
     method Bool { ?@!values }
     method Str  { self.value }
-    method list { @!values }
+    method list { self.prepared-values }
 }
 
 class HTTP::Header::Standard is HTTP::Header {
