@@ -19,10 +19,21 @@ enum HTTP::Header::Standard::Name is export
         Expires Last-Modified
     >;
 
+sub standard-header-by-name($name) returns HTTP::Header::Standard::Name is export {
+    my $v = HTTP::Header::Standard::Name.enums{$name};
+    if $v.defined {
+        HTTP::Header::Standard::Name($v);
+    }
+    else {
+        HTTP::Header::Standard::Name;
+    }
+}
+
 class HTTP::Headers { ... }
 
 role HTTP::Header {
     has @.values is rw;
+    has Bool $.quiet = False;
 
     my @dow = <Mon Tue Wed Thu Fri Sat Sun>;
     my @moy = <Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec>;
@@ -172,7 +183,7 @@ class HTTP::Headers {
     has HTTP::Header %.headers;
 
     method build-header($name, *@values) returns HTTP::Header { 
-        if my $std = HTTP::Header::Standard::Name($name) {
+        if my $std = standard-header-by-name($name) {
             my $h = HTTP::Header::Standard.new(:name($std), :@values);
             if $std ~~ HTTP::Header::Standard::Name::Content-Type {
                 $h but HTTP::Header::Standard::Content-Type;
@@ -218,7 +229,7 @@ class HTTP::Headers {
 
     multi method header(Str $name, :$quiet = False) is rw returns HTTP::Header {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
-            if !$quiet && HTTP::Header::Standard::Name($name);
+            if !$!quiet && !$quiet && standard-header-by-name($name).defined;
 
         self.header-proxy($name);
     }
