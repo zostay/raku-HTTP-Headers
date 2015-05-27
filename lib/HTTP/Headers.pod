@@ -1,0 +1,220 @@
+=TITLE HTTP::Headers
+
+=SUBTITLE Tools for working with HTTP message headers
+
+=begin SYNOPSIS
+
+    use HTTP::Headers;
+    my $headers = HTTP::Headers.new;
+    $headers.Content-Type = 'text/html';
+    $headers.Content-Type.charset = "UTF-8";
+    $headers.Content-Length = $content.encode.bytes;
+    
+    my $CRLF = "\x0d\x0a";
+    print "200 OK$CRLF;
+    print $headers.as-string(:eol($CRLF));
+    print $CRLF;
+    print $content;
+
+=end SYNOPSIS
+
+=begin DESCRIPTION
+
+This module provides convenient tools for working with HTTP headers. An emphasis has been placed on making it easy to use in a way that helps catch errors early. It has also been built for extensibility.
+
+=end DESCRIPTION
+
+=begin pod
+
+=head1 Methods
+
+=head2 method new
+
+    my $headers = HTTP::Headers.new;
+
+Constructs a new object for working with headers.
+
+=head2 method header
+
+    my $content-type = $headers.header(Content-Type);
+    $header.header(Content-Type) = "text/html";
+    my $x-custom = $headers.header("X-Custom-Header");
+    $headers.header("X-Custom-Header") = "foo";
+
+This method is writable and allows the use of either the values in the C<HTTP::Header::Standard::Name> enumeration or string values. In general, you should not use strings when you can use the enumeration in your code. By using the enumeration, you can find typos and other errors more quickly.
+
+    $headers.header(Content-MIME-Type); # I forgot it's just Content-Type
+    # Undeclared name:
+    #     Content-MIME-Type used at line 1
+
+The library will remind you of this best practice if you use a string when you could use an enumeration:
+
+    $headers.header("Content-Type");
+    # Calling .header(Content-Type) is preferred to .header("Content-Type") for standard HTTP headers.
+
+If you don't want to see these, you can ask the object or the method to be quiet:
+
+    $headers.header("Content-Type", :quiet);
+    # OR during construction
+    my $headers = HTTP::Headers.new(:$quiet);
+
+When setting values on a header, you may set either a single or multiples.
+
+    $headers.header(Content-Length) = 42;
+    $headers.header(Accept) = "text/html", "text/*", "*/*";
+    say $headers.as-string;
+    # Accept: text/html
+    # Accept: text/*
+    # Accept: */*
+    # Content-Length: 42
+
+By setting with a comma, you will generate multiple headers.
+
+You may also set headers with L<DateTime>, L<Instant>, and L<Duration> objects and it should do the right thing. For example,
+
+    $headers.header(Date)        = DateTime.now;
+    $headers.header(Retry-After) = Duration.new(120);
+    say $headers.as-string;
+    # Date: Thu, 14 May 2015 09:48:00 GMT
+    # Retry-After: 120
+
+When you read a header, the value returns is a L<HTTP::Header> object.
+
+    my HTTP::Header $ct = $headers.header(Content-Type);
+    my HTTP::Header $xf = $headers.header("X-Foo-Custom");
+
+This object stringifies to the value of the header (with multiple values being joined together using a comma, safe according to RFC). It also provides a bunch of additional tools for working with and manipulating the header. For example:
+
+    $headers.header(Accept).push: "text/css", "text/js";
+    $headers.header(Content-Type).charset = "UTF-8";
+
+See L<HTTP::Header> for details.
+
+=head2 method remove-header
+
+    $headers.remove-header(Content-Type);
+    $headers.remove-header("X-Foo-Custom");
+
+This method will remove a header from the list. The removed L<HTTP::Header> object is returned.
+
+=head2 method remove-headers
+
+    $headers.remove-headers(Content-Type, "X-Foo-Custom");
+
+This method remove multiple headers. The removed header objects are returned in a list.
+
+=head2 method remove-content-headers
+
+    $headers.remove-content-headers;
+
+This method removes all the entity headers:
+
+    Allow Content-Encoding Content-Language Content-Length
+    Content-Location Content-MD5 Content-Range Content-Type
+    Expires Last-Modified
+
+as well as any that start with "Content-".
+
+=head2 method clear
+
+    $headers.clear;
+
+This removes all headers.
+
+=head2 method clone
+
+    my $headers2 = $headers.clone;
+
+This performs a deep clone of the object.
+
+=head2 method list
+
+    my @headers = $headers.list;
+
+This returns all the headers stored in this object, sorted according to the RFC recommendation (general headers first, then request/response headers, then entity/content headers, and finally custom headers).
+
+=head2 method for
+
+    $headers.for: -> $header { ... }
+
+Provides a way to iterate over all the headers in the object.
+
+=head2 method as-string
+
+    $headers.as-string(:eol<\n>);
+
+Returns the headers for output using the given line separator. If no line separator is given, "\n" is used.
+
+=head2 method Str
+
+    $headers.Str;
+    ~$headers;
+
+This calls L</method as-string> with no arguments.
+
+=head2 method for-PSGI
+
+    my @headers = $headers.for-PSGI
+
+This returns the headers formatted for output from a PSGI application, as an array of Pairs.
+
+=head1 Convenience Methods
+
+The following methods are provided as a shortcut for L</method header> and can be used as an accessor or mutator.
+
+    # General Headers
+    method Cache-Control is rw
+    method Connection is rw
+    method Date is rw
+    method Pragma is rw
+    method Trailer is rw
+    method Transfer-Encoding is rw
+    method Upgrade is rw
+    method Via is rw
+    method Warning is rw
+
+    # Request Headers
+    method Accept is rw
+    method Accept-Charset is rw
+    method Accept-Encoding is rw
+    method Accept-Language is rw
+    method Authorization is rw
+    method Expect is rw
+    method From is rw
+    method Host is rw
+    method If-Match is rw
+    method If-Modified-Since is rw
+    method If-None-Match is rw
+    method If-Range is rw
+    method If-Unmodified-Since is rw
+    method Max-Forwards is rw
+    method Proxy-Authorization is rw
+    method Range is rw
+    method Referer is rw
+    method TE is rw
+    method User-Agent is rw
+    
+    # Response Headers
+    method Accept-Ranges is rw
+    method Age is rw
+    method ETag is rw
+    method Location is rw
+    method Proxy-Authenticate is rw
+    method Retry-After is rw
+    method Server is rw
+    method Vary is rw
+    method WWW-Authenticate is rw
+    
+    # Entity Headers
+    method Allow is rw
+    method Content-Encoding is rw
+    method Content-Language is rw
+    method Content-Length is rw
+    method Content-Location is rw
+    method Content-MD5 is rw
+    method Content-Range is rw
+    method Content-Type is rw
+    method Expires is rw
+    method Last-Modified is rw
+
+=end pod
