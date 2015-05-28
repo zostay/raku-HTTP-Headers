@@ -160,29 +160,7 @@ $h.clear;
 is($h.as-string, "");
 $h2 = Nil;
 
-# Headers may be set to date or instants and do TheRightThing™
-my $date = DateTime.new(:2015year, :5month, :14day, :9hour, :48minute);
-$h.Date = $date;
-is($h.as-string, "Date: Thu, 14 May 2015 09:48:00 GMT\n");
-$h.Date = Instant.new(1431596915);
-is($h.as-string, "Date: Thu, 14 May 2015 09:48:00 GMT\n");
-$h.Retry-After = Duration.new(120);
-is($h.as-string, "Date: Thu, 14 May 2015 09:48:00 GMT\nRetry-After: 120\n");
-
 $h.clear;
-$h.Content-Type = 'text/html; charset=UTF-8';
-is($h.Content-Type.primary, 'text/html');
-is($h.Content-Type.charset, 'UTF-8');
-$h.Content-Type.charset = 'ISO-8859-1';
-is(~$h.Content-Type, 'text/html; charset=ISO-8859-1');
-$h.Content-Type.charset = Nil;
-is(~$h.Content-Type, 'text/html');
-$h.Content-Type.charset = 'Latin1';
-is(~$h.Content-Type, 'text/html; charset=Latin1');
-is($h.Content-Type.is-html, True);
-is($h.Content-Type.is-text, True);
-is($h.Content-Type.is-xhtml, False);
-is($h.Content-Type.is-xml, False);
 
 # Test the Hash-accessors
 is($h{Content-Type}.name, Content-Type);
