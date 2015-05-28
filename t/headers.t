@@ -196,31 +196,4 @@ is($h<Zoo> :exists, True);
 ok($h<Zoo> :delete);
 is($h<Zoo> :exists, False);
 
-# Apps may choose to extend with their own headers, here with some sort-of
-# default values in place.
-class MyApp::CustomHeaders is HTTP::Headers {
-    enum MyAppHeader < X-Foo X-Bar >;
-
-    method build-header($name, *@values) {
-        if $name ~~ MyAppHeader {
-            HTTP::Header::Custom.new(:name($name.Str), :42values);
-        }
-        else {
-            nextsame;
-        }
-    }
-
-    multi method header(MyAppHeader $name) is rw {
-        self.header-proxy($name);
-    }
-
-    method X-Foo is rw { self.header(MyAppHeader::X-Foo) }
-    method X-Bar is rw { self.header(MyAppHeader::X-Bar) }
-}
-
-my $h3 = MyApp::CustomHeaders.new;
-is($h3.X-Foo.value, 42);
-is($h3.X-Bar.value, 42);
-is($h3.as-string(:eol('; ')), "X-Bar: 42; X-Foo: 42; ");
-
 done;
