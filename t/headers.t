@@ -37,7 +37,7 @@ is($h.header("Not-There").list, []);
 
 $h.header("Foo") = [ 1, 1 ];
 is(~$h.header("Foo"), "1, 1");
-is_deeply($h.header("Foo").list, [ 1, 1 ]);
+is_deeply($h.header("Foo").list, (1, 1).list.item);
 $h.header('foo') = 11;
 $h.header('Foo').push: 12; 
 $h.header('bar') = 22;
@@ -196,7 +196,8 @@ is($h<Zoo> :exists, True);
 ok($h<Zoo> :delete);
 is($h<Zoo> :exists, False);
 
-# Apps may choose to extend with their own headers
+# Apps may choose to extend with their own headers, here with some sort-of
+# default values in place.
 class MyApp::CustomHeaders is HTTP::Headers {
     enum MyAppHeader < X-Foo X-Bar >;
 

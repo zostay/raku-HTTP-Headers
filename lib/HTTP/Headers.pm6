@@ -75,12 +75,13 @@ role HTTP::Header {
 
     #| Retrieve the primary value out of the header value
     method primary {
+        my $self = self;
         Proxy.new(
             FETCH => method () {
-                try { self.prepared-values[0].comb(/ <-[ ; ]>+ /)[0].trim }
+                try { $self.prepared-values[0].comb(/ <-[ ; ]>+ /)[0].trim }
             },
             STORE => method ($new) {
-                my $value = @(self.prepared-values)[0];
+                my $value = @($self.prepared-values)[0];
                 my @items = try { $value.comb(/ <-[ ; ]>+ /, 2) };
                 @items[0] = $new.trim;
                 @!values[0] = @items.join('; ');
@@ -144,8 +145,8 @@ role HTTP::Header {
     method AT-POS($index) { @!values[$index] }
 
     # TODO Why can't I make this a stub ... ?
-
-    method name { } #= The name of the header
+    #method name { } #= The name of the header
+    
     method key returns Str { self.name.lc } #= The header lookup key
 
     method push(*@values) { @!values.push: @values } #= Push values into the header
@@ -165,11 +166,9 @@ role HTTP::Header {
 
     #| Output the header in Name: Value form for each value
     method as-string(Str :$eol = "\n") {
-        my @values = self.prepared-values;
-        my @lines = do for @values -> $value {
-            "{self.name}: $value";
+        join $eol, do for self.prepared-values -> $value {
+            "{self.name.Str}: $value";
         }
-        @lines.join($eol);
     }
 
     method Bool { ?@!values } #= True if this header has values
@@ -213,8 +212,9 @@ role HTTP::Header::Standard::Content-Type {
 class HTTP::Header::Custom does HTTP::Header {
     has Str $.name;
 
-    submethod BUILD(:$!name) {
+    submethod BUILD(:$!name, :$values) {
         $!name = $!name.trans('_' => ' ', '-' => ' ').wordcase.trans(' ' => '-');
+        @!values = $values.list;
     }
 
     method clone {
