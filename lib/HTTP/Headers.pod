@@ -36,8 +36,8 @@ Constructs a new object for working with headers. The C<:$quiet> option can be u
 
 =head2 method header
 
-    method header(HTTP::Header::Standard::Name $name) is rw returns HTTP::Header
-    method header(Str $name) is rw returns HTTP::Header
+    multi method header(HTTP::Header::Standard::Name $name) is rw returns HTTP::Header
+    multi method header(Str $name) is rw returns HTTP::Header
 
 This method is writable and allows the use of either the values in the C<HTTP::Header::Standard::Name> enumeration or string values. In general, you should not use strings when you can use the enumeration in your code. By using the enumeration, you can find typos and other errors more quickly.
 
@@ -154,6 +154,24 @@ This calls L</method as-string> with no arguments.
 
 This returns the headers formatted for output from a PSGI application, as an array of Pairs.
 
+=head1 Hash-like Operations
+
+You can also treat L<HTTP::Headers> like a hash in some ways. These are B<experimental> and might be removed or changed in the future.
+
+=head2 method postcircumfix:<{ }>
+
+    method postcircumfix:<{ }>($key)
+
+This may be used to return or assign a head value.
+
+=head2 adverb :delete
+
+This may be used to delete headers.
+
+=head2 adverb :exists
+
+This may be used to check to see if a head is set.
+
 =head1 Convenience Methods
 
 The following methods are provided as a shortcut for L</method header> and can be used as an accessor or mutator.
@@ -212,5 +230,45 @@ The following methods are provided as a shortcut for L</method header> and can b
     method Content-Type is rw
     method Expires is rw
     method Last-Modified is rw
+
+=head1 Extending HTTP::Headers
+
+It is possible to create a sub-class of L<HTTP::Headers> more suited to your application. As a simplistic example, here's a customization that provides two new custom headers named "X-Foo" and "X-Bar" which have a default column setting of 42 when used.
+
+    class MyApp::CustomHeaders is HTTP::Headers {
+        enum MyAppHeader < X-Foo X-Bar >;
+
+        method build-header($name, *@values) {
+            if $name ~~ MyAppHeader {
+                HTTP::Header::Custom.new(:name($name.Str), :42values);
+            }
+            else {
+                nextsame;
+            }
+        }
+
+        multi method header(MyAppHeader $name) is rw {
+            self.header-proxy($name);
+        }
+
+        method X-Foo is rw { self.header(MyAppHeader::X-Foo) }
+        method X-Bar is rw { self.header(MyAppHeader::X-Bar) }
+    }
+
+Here is a description of the methods you'll need to consider in doing this.
+
+=head2 method build-header
+
+    method build-header($name, *@values) returns HTTP::Header
+
+This is a factory method used to decide how to build the headers being stored. Here is the place where you'll want to add custom roles to your headers, instantiate any custom implementations of L<HTTP::Header>, etc.
+
+It is recommended that you define it to build what you need and then use C<nextsame> to handle all the remaining cases.
+
+=head2 method header-proxy
+
+    method header-proxy($name) returns Proxy
+
+This is a handy helper that allows you to easily build your own custom version of L</method header>. It returns a L<Proxy> useful for building C<is rw> methods similar to those in L<HTTP::Headers>.
 
 =end pod

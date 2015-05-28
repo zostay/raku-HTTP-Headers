@@ -172,6 +172,8 @@ You may use the [] operator to lookup values on the header. Basically, these are
 
     $header.values[*] === $header[*]
 
+This is B<experimental> and might be removed or changed in the future.
+
 =head2 method prepared-values
 
     method prepared-values
