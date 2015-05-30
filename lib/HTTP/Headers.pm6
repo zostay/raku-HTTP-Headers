@@ -8,12 +8,12 @@ enum HTTP::Header::Standard::Name is export
         Upgrade Via Warning
 
         Accept Accept-Charset Accept-Encoding Accept-Language
-        Authorization Expect From Host If-Match If-Modified-Since
+        Authorization Cookie Expect From Host If-Match If-Modified-Since
         If-None-Match If-Range If-Unmodified-Since Max-Forwards
         Proxy-Authorization Range Referer TE User-Agent
 
         Accept-Ranges Age ETag Location Proxy-Authenticate Retry-After
-        Server Vary WWW-Authenticate
+        Server Set-Cookie Vary WWW-Authenticate
 
         Allow Content-Encoding Content-Language Content-Length
         Content-Location Content-MD5 Content-Range Content-Type
@@ -392,6 +392,7 @@ class HTTP::Headers {
     method Accept-Encoding     is rw { self.header(HTTP::Header::Standard::Name::Accept-Encoding) }
     method Accept-Langauge     is rw { self.header(HTTP::Header::Standard::Name::Accept-Language) }
     method Authorization       is rw { self.header(HTTP::Header::Standard::Name::Authorization) }
+    method Cookie              is rw { self.header(HTTP::Header::Standard::Name::Cookie) }
     method Expect              is rw { self.header(HTTP::Header::Standard::Name::Expect) }
     method From                is rw { self.header(HTTP::Header::Standard::Name::From) }
     method Host                is rw { self.header(HTTP::Header::Standard::Name::Host) }
@@ -414,6 +415,7 @@ class HTTP::Headers {
     method Proxy-Authenticate  is rw { self.header(HTTP::Header::Standard::Name::Proxy-Authenticate) }
     method Retry-After         is rw { self.header(HTTP::Header::Standard::Name::Retry-After) }
     method Server              is rw { self.header(HTTP::Header::Standard::Name::Server) }
+    method Set-Cookie          is rw { self.header(HTTP::Header::Standard::Name::Set-Cookie) }
     method Vary                is rw { self.header(HTTP::Header::Standard::Name::Vary) }
     method WWW-Authenticate    is rw { self.header(HTTP::Header::Standard::Name::WWW-Authenticate) }
 
