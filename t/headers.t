@@ -71,7 +71,7 @@ is($h.as-string, $h.clone.as-string);
 is($h.clone.remove-header("Foo"), '1');
 is($h.clone.remove-header("Bar"), '2');
 is($h.clone.remove-header("Baz"), '2, 3');
-is($h.clone.remove-headers(<Foo Bar Baz Not-There>).elems, 4);
+is($h.clone.remove-header(|<Foo Bar Baz Not-There>).elems, 4);
 is($h.clone.remove-header("Not-There"), HTTP::Header);
 
 $h .= new;

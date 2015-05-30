@@ -289,13 +289,18 @@ class HTTP::Headers {
     }
 
     #| Remove a header
-    method remove-header($name) {
+    multi method remove-header($name) {
         my $tmp = self.build-header($name);
         %!headers{$tmp.key} :delete;
     }
+    
+    method remove-headers(*@names) {
+        DEPRECATED('remove-header',|<0.2 1.0>);
+        self.remove-header(|@names);
+    }
 
     #| Remove more than one header
-    method remove-headers(*@names) {
+    multi method remove-header(*@names) {
         do for @names -> $name {
             my $tmp = self.build-header($name);
             %!headers{$tmp.key} :delete;
@@ -304,7 +309,7 @@ class HTTP::Headers {
 
     #| Remove all the entity and Content-* headers
     method remove-content-headers {
-        self.remove-headers( %!headers.keys.grep(/^ content "-"/), <
+        self.remove-header( %!headers.keys.grep(/^ content "-"/), <
             Allow Content-Encoding Content-Language Content-Length
             Content-Location Content-MD5 Content-Range Content-Type
             Expires Last-Modified
