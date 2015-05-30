@@ -348,16 +348,21 @@ class HTTP::Headers {
         }
     }
 
-    #| Iterate over the headers in sorted order
     method for(&code) {
+        # DEPRECATED WITHIN RAKUDO!!!
         self.sorted-headers.for: &code;
+    }
+
+    #| Iterate over the headers in sorted order
+    method flatmap(&code) {
+        self.sorted-headers.flatmap: &code;
     }
 
     #| Output the headers as a string in sorted order
     method as-string(Str :$eol = "\n") {
         self.vacuum;
 
-        my $string = join $eol, self.for: -> $header {
+        my $string = join $eol, self.flatmap: -> $header {
             $header.as-string(:$eol);
         };
 
@@ -370,7 +375,7 @@ class HTTP::Headers {
 
     #| Return the headers as a list of Pairs for use with PSGI
     method for-PSGI {
-        self.for: -> $h { 
+        self.flatmap: -> $h { 
             do for $h.prepared-values -> $v {
                 ~$h.name => ~$v
             }
