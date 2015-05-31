@@ -173,6 +173,7 @@ role HTTP::Header {
 
     method Bool { ?@!values } #= True if this header has values
     method Str  { self.value } #= Same as calling .value
+    method Int  { self.value.Int } #= Treat the whole value as an Int
     method list { self.prepared-values } #= Same as calling .prepared-values
 }
 
