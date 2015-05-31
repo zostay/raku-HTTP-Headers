@@ -220,11 +220,6 @@ role HTTP::Header::Standard::Content-Type {
 class HTTP::Header::Custom does HTTP::Header {
     has Str $.name;
 
-    submethod BUILD(:$!name, :$values) {
-        $!name = $!name.trans('_' => ' ', '-' => ' ').wordcase.trans(' ' => '-');
-        @!values = $values.list;
-    }
-
     method clone {
         my HTTP::Header::Custom $obj .= new(:$!name);
         $obj.values = @.values;
@@ -239,7 +234,12 @@ class HTTP::Headers {
 
     #| Helper for building header objects
     method build-header($name, *@values) returns HTTP::Header { 
-        if my $std = standard-header-by-name($name) {
+        my $std-name = $name;
+        if $name ~~ Str {
+            $std-name = $name.trans('_' => ' ', '-' => ' ').wordcase.trans(' ' => '-');
+        }
+
+        if my $std = standard-header-by-name($std-name) {
             my $h = HTTP::Header::Standard.new(:name($std), :@values);
             if $std ~~ HTTP::Header::Standard::Name::Content-Type {
                 $h but HTTP::Header::Standard::Content-Type;
@@ -249,7 +249,7 @@ class HTTP::Headers {
             }
         }
         else {
-            HTTP::Header::Custom.new(:$name, :@values);
+            HTTP::Header::Custom.new(:name($std-name), :@values);
         }
     }
 
