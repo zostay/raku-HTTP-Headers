@@ -78,7 +78,14 @@ role HTTP::Header {
         my $self = self;
         Proxy.new(
             FETCH => method () {
-                try { $self.prepared-values[0].comb(/ <-[ ; ]>+ /)[0].trim }
+                try { 
+                    if $self.values.elems > 0 {
+                        $self.prepared-values[0].comb(/ <-[ ; ]>+ /)[0].trim 
+                    }
+                    else {
+                        Str
+                    }
+                }
             },
             STORE => method ($new) {
                 my $value = @($self.prepared-values)[0];
