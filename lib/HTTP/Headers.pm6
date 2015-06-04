@@ -232,6 +232,63 @@ class HTTP::Headers {
     has HTTP::Header %.headers; #= Internal header storage... no touchy
     has Bool $.quiet = False; #= Silence all warnings
 
+    #| Initialze headers with a list of pairs
+    multi method new(@headers, Bool :$quiet = False) {
+        my $self = self.bless(:$quiet);
+        $self.headers(@headers) if @headers;
+        $self;
+    }
+
+    #| Initialize headers with an array
+    multi method new(%headers, Bool :$quiet = False) {
+        my $self = self.bless(:$quiet);
+        $self.headers(%headers) if %headers;
+        $self;
+    }
+
+    #| Initialize headers empty or with a slurpy list of pairs or a slurpy hash
+    multi method new(Bool :$quiet = False, *@headers, *%headers) {
+        my $self = self.bless(:$quiet);
+        $self.headers(%headers) if %headers;
+        $self.headers(@headers) if @headers;
+        $self;
+    }
+
+    #| Set multiple headers from a list of pairs
+    multi method headers(@headers) {
+        my $seen = SetHash.new;
+        for flat @headers».kv -> $k, $v {
+            if $seen ∋ $k {
+                self.header($k).push: $v;
+            }
+            else {
+                self.header($k) = $v;
+                $seen{$k}++;
+            }
+        }
+    }
+
+    #| Set multiple headers from a hash
+    multi method headers(%headers) {
+        for flat %headers.kv -> $k, $v {
+            self.header($k) = $v;
+        }
+    }
+
+    #| Set multiple headers from a slurpy list of pairs or slurpy hash
+    multi method headers(*@headers, *%headers) {
+        my $seen = SetHash.new;
+        for flat @headers».kv, %headers.kv -> $k, $v {
+            if $seen ∋ $k {
+                self.header($k).push: $v;
+            }
+            else {
+                self.header($k) = $v;
+                $seen{$k}++;
+            }
+        }
+    }
+
     #| Helper for building header objects
     method build-header($name, *@values) returns HTTP::Header { 
         my $std-name = $name;
