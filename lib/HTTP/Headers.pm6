@@ -20,17 +20,6 @@ enum HTTP::Header::Standard::Name is export
         Expires Last-Modified
     >;
 
-#| Performs a reverse lookup of headers by header name
-sub standard-header-by-name($name) returns HTTP::Header::Standard::Name is export {
-    my $v = HTTP::Header::Standard::Name.enums{$name};
-    if $v.defined {
-        HTTP::Header::Standard::Name($v);
-    }
-    else {
-        HTTP::Header::Standard::Name;
-    }
-}
-
 class HTTP::Headers { ... }
 
 #| Role for defining all header objects
@@ -229,8 +218,10 @@ class HTTP::Header::Custom does HTTP::Header {
 
 #! A group of headers
 class HTTP::Headers {
-    has HTTP::Header %.headers; #= Internal header storage... no touchy
+    has HTTP::Header %!headers; #= Internal header storage... no touchy
     has Bool $.quiet = False; #= Silence all warnings
+
+    method internal-headers() { %!headers }
 
     #| Initialze headers with a list of pairs
     multi method new(@headers, Bool :$quiet = False) {
@@ -296,7 +287,7 @@ class HTTP::Headers {
             $std-name = $name.trans('_' => ' ', '-' => ' ').wordcase.trans(' ' => '-');
         }
 
-        if my $std = standard-header-by-name($std-name) {
+        if my $std = ::($std-name) {
             my $h = HTTP::Header::Standard.new(:name($std), :@values);
             if $std ~~ HTTP::Header::Standard::Name::Content-Type {
                 $h but HTTP::Header::Standard::Content-Type;
@@ -325,7 +316,7 @@ class HTTP::Headers {
     method clone {
         my HTTP::Headers $obj .= new;
         for %!headers.kv -> $k, $v {
-            $obj.headers{$k} = $v.clone;
+            $obj.internal-headers{$k} = $v.clone;
         }
         $obj;
     }
@@ -348,7 +339,7 @@ class HTTP::Headers {
     #| Read or write a custom header
     multi method header(Str $name, :$quiet = False) is rw returns HTTP::Header {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
-            if !$!quiet && !$quiet && standard-header-by-name($name).defined;
+            if !$!quiet && !$quiet && ::($name).defined;
 
         self.header-proxy($name);
     }

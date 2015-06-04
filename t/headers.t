@@ -126,7 +126,7 @@ is-deeply([ $h.for-PSGI ], [
 $h2 = $h.clone;
 is($h.as-string, $h2.as-string);
 isnt($h.WHICH, $h2.WHICH);
-isnt($h.headers.WHICH, $h2.headers.WHICH);
+isnt($h.internal-headers.WHICH, $h2.internal-headers.WHICH);
  
 $h.remove-content-headers;
 is($h.as-string, q:to/EOT/);
