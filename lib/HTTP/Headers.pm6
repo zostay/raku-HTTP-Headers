@@ -339,7 +339,7 @@ class HTTP::Headers {
     #| Read or write a custom header
     multi method header(Str $name, :$quiet = False) is rw returns HTTP::Header {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
-            if !$!quiet && !$quiet && ::($name).defined;
+            if (!$!quiet || !$quiet) && ::($name).defined;
 
         self.header-proxy($name);
     }
