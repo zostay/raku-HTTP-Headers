@@ -102,23 +102,20 @@ role HTTP::Header {
         my $found = False;
         @!values = do for @(self.prepared-values) -> $prep-value {
             my @pairs = try { $prep-value.comb(/ <-[ ; ]>+ /) };
-            my @result-pairs = do for @pairs {
+            my @result-pairs = gather for @pairs {
                 when !$found && /'='/ { # only change the first
                     my ($key, $value) = .split('=', 2);
                     if ($key.trim.lc eq $name.trim.lc) {
                         $found++;
                         if ($new-value.defined) {
-                            "{$key.trim}={$new-value.trim}"
-                        }
-                        else {
-                            ()
+                            take "{$key.trim}={$new-value.trim}"
                         }
                     }
                     else {
-                        $_
+                        take $_
                     }
                 }
-                default { $_ }
+                default { take $_ }
             };
 
             @result-pairs.push: "{$name.trim}={$new-value.trim}"
