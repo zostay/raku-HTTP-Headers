@@ -66,7 +66,7 @@ role HTTP::Header {
     }
 
     #| Retrieve the primary value out of the header value
-    method primary {
+    method primary is rw {
         my $self = self;
         Proxy.new(
             FETCH => method () {
@@ -323,7 +323,7 @@ class HTTP::Headers {
     }
 
     #| Helper for use by .header()
-    method header-proxy($name) {
+    method header-proxy($name) is rw {
         my $tmp = self.build-header($name);
         my $h = %!headers{$tmp.key} //= $tmp;
         Proxy.new(
