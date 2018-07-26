@@ -9,7 +9,7 @@
     $headers.Content-Type = 'text/html';
     $headers.Content-Type.charset = "UTF-8";
     $headers.Content-Length = $content.encode.bytes;
-    
+
     my $CRLF = "\x0d\x0a";
     print "200 OK$CRLF;
     print $headers.as-string(:eol($CRLF));
@@ -136,9 +136,9 @@ This performs a deep clone of the object.
 
 This returns all the headers stored in this object, sorted according to the RFC recommendation (general headers first, then request/response headers, then entity/content headers, and finally custom headers).
 
-=head2 method for
+=head2 method map
 
-    method for(&code)
+    method map(&code)
 
 Provides a way to iterate over all the headers in the object.
 
@@ -213,7 +213,7 @@ The following methods are provided as a shortcut for L</method header> and can b
     method Referer is rw
     method TE is rw
     method User-Agent is rw
-    
+
     # Response Headers
     method Accept-Ranges is rw
     method Age is rw
@@ -224,7 +224,7 @@ The following methods are provided as a shortcut for L</method header> and can b
     method Server is rw
     method Vary is rw
     method WWW-Authenticate is rw
-    
+
     # Entity Headers
     method Allow is rw
     method Content-Encoding is rw

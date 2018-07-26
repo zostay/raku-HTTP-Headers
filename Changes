@@ -1,3 +1,11 @@
+v0.2    ####-##-##
+
+    * PR #11: Fixes missing `is rw` declarations. (HT: @AlexDaniel)
+    * Renamed .pod files to .pod6
+    * Deprecated .for(). this seriously demonstrates how long ago I last
+      touched this code. Whoa.
+    * Added the .map() method.
+
 v0.1    2018-04-24
 
     * Initial release to CPAN.

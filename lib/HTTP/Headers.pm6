@@ -405,9 +405,13 @@ class HTTP::Headers {
         }
     }
 
-    method for(&code) {
+    method for(&code) is DEPRECATED('the .flatmap() method') {
         # DEPRECATED WITHIN RAKUDO!!!
         self.sorted-headers.for: &code;
+    }
+
+    method map(&code) {
+        self.sorted-headers.map: &code;
     }
 
     #| Iterate over the headers in sorted order
