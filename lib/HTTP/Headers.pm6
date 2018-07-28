@@ -432,7 +432,7 @@ class HTTP::Headers {
     }
 
     #! Same as as-string
-    method Str { self.as-string }
+    multi method Str(Str :$eol = "\n") { self.as-string(:$eol) }
 
     #| Return the headers as a list of Pairs for use with PSGI
     method for-PSGI {
@@ -447,7 +447,6 @@ class HTTP::Headers {
             }
         }
     }
-
 
     method Cache-Control       is rw { self.header(HTTP::Header::Standard::Name::Cache-Control) }
     method Connection          is rw { self.header(HTTP::Header::Standard::Name::Connection) }

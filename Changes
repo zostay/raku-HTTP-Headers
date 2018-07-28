@@ -5,6 +5,7 @@ v0.2    ####-##-##
     * Deprecated .for(). this seriously demonstrates how long ago I last
       touched this code. Whoa.
     * Added the .map() method.
+    * Added the :eol option to HTTP::Headers.Str
 
 v0.1    2018-04-24
 

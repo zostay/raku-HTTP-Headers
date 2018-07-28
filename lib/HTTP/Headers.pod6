@@ -150,9 +150,9 @@ Returns the headers for output using the given line separator. If no line separa
 
 =head2 method Str
 
-    method Str returns Str
+    multi method Str(:$eol = "\n") returns Str
 
-This calls L</method as-string> with no arguments.
+This calls L</method as-string> with the given arguments.
 
 =head2 method for-PSGI
 
