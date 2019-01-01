@@ -170,7 +170,12 @@ role HTTP::Header {
     method Bool { ?@!values } #= True if this header has values
     method Str  { self.value } #= Same as calling .value
     method Int  { self.value.Int } #= Treat the whole value as an Int
+    method Numeric { self.value.Numeric } #= Treat the whole value as Numeric
     method list { self.prepared-values } #= Same as calling .prepared-values
+}
+
+multi infix:<+> (HTTP::Header $h, Numeric $v) {
+    $h.Numeric + $v;
 }
 
 #| A standard header definition
@@ -415,7 +420,7 @@ class HTTP::Headers {
     }
 
     #| Iterate over the headers in sorted order
-    method flatmap(&code) {
+    method flatmap(&code) is DEPRECATED("'map'") {
         self.sorted-headers.flatmap: &code;
     }
 

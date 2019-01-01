@@ -6,8 +6,11 @@
       have been a test for definedness during header construction.
     * Bugfix: There was a typo in the Accept-Language header method.
     * Deprecation: for-P6SGI has been replaced with for-P6WAPI
+    * Deprecation: flatmap is deprecated
     * Added documentation regarding the downside of overusing Proxy for building
       mutators in Perl 6.
+    * Adding support for Numeric + ops on HTTP::Header, so
+      $header.Content-Length += 42 works as expected.
 
 v0.2    2018-07-27
 
