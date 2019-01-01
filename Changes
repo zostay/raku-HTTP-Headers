@@ -1,4 +1,4 @@
-{{$NEXT}}
+v0.3.0	2019-01-01
 
     * Bugfix: Added missing return-rw statements when returning values from is
       rw methods.
