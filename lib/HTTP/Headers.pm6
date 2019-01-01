@@ -461,7 +461,7 @@ class HTTP::Headers {
     method Accept              is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept) }
     method Accept-Charset      is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Charset) }
     method Accept-Encoding     is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Encoding) }
-    method Accept-Langauge     is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Language) }
+    method Accept-Language     is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Language) }
     method Authorization       is rw { return-rw self.header(HTTP::Header::Standard::Name::Authorization) }
     method Cookie              is rw { return-rw self.header(HTTP::Header::Standard::Name::Cookie) }
     method Expect              is rw { return-rw self.header(HTTP::Header::Standard::Name::Expect) }

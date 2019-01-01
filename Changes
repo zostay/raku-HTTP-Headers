@@ -4,6 +4,7 @@
       rw methods.
     * Bugfix: Cache-Control header was unusuable because a test for truth should
       have been a test for definedness during header construction.
+    * Bugfix: There was a typo in the Accept-Language header method.
     * Added documentation regarding the downside of overusing Proxy for building
       mutators in Perl 6.
 
