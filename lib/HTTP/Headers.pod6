@@ -1,3 +1,5 @@
+=begin pod
+
 =TITLE HTTP::Headers
 
 =SUBTITLE Tools for working with HTTP message headers
@@ -276,5 +278,11 @@ It is recommended that you define it to build what you need and then use C<nexts
     method header-proxy($name) returns Proxy
 
 This is a handy helper that allows you to easily build your own custom version of L</method header>. It returns a L<Proxy> useful for building C<is rw> methods similar to those in L<HTTP::Headers>.
+
+=head1 CAVEATS
+
+This module provides a mutator style that is not considered ideal, possibly even un-Perlish. It pretty much completely overuses L<Proxy> objects and such to make mutators that perform complex operations during seemingly straightforward assignment operations. This is probably not wise, but it seemed like a good idea at the time of first writing.
+
+For a detailed write-up of why this is not preferable, see this blog post by Jonathan Worthington: L<https://6guts.wordpress.com/2016/11/25/perl-6-is-biased-towards-mutators-being-really-simple-thats-a-good-thing/|Perl 6 is biased towards mutators being really simple. That’s a good thing.>
 
 =end pod

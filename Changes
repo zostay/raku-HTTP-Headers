@@ -2,6 +2,8 @@
 
     * Bugfix: Added missing return-rw statements when returning values from is
       rw methods.
+    * Added documentation regarding the downside of overusing Proxy for building
+      mutators in Perl 6.
 
 v0.2    2018-07-27
 
