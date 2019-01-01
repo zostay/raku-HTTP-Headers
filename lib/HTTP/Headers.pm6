@@ -59,7 +59,7 @@ role HTTP::Header {
     #| Treat the values of this header as a single value
     method value is rw {
         my $self = self;
-        Proxy.new(
+        return-rw Proxy.new(
             FETCH => method ()     { $self.prepared-values.join(', ') },
             STORE => method ($new) { $self.values = $new },
         );
@@ -68,7 +68,7 @@ role HTTP::Header {
     #| Retrieve the primary value out of the header value
     method primary is rw {
         my $self = self;
-        Proxy.new(
+        return-rw Proxy.new(
             FETCH => method () {
                 try {
                     if $self.values.elems > 0 {
@@ -131,7 +131,7 @@ role HTTP::Header {
     #| Read/write a parameter set within a value
     method param($name) is rw {
         my $self = self;
-        Proxy.new(
+        return-rw Proxy.new(
             FETCH => method ()     { $self.params{$name} },
             STORE => method ($new) { $self.set-param($name, $new) },
         );
@@ -202,7 +202,7 @@ role HTTP::Header::Standard::Content-Type {
     }
 
     #| Read or write the charset parameter
-    method charset is rw { self.param('charset') }
+    method charset is rw { return-rw self.param('charset') }
 }
 
 #| A custom header definition
@@ -326,7 +326,7 @@ class HTTP::Headers {
     method header-proxy($name) is rw {
         my $tmp = self.build-header($name);
         my $h = %!headers{$tmp.key} //= $tmp;
-        Proxy.new(
+        return-rw Proxy.new(
             FETCH => method ()      { $h },
             STORE => method (*@new) { $h.values = @new }
         );
@@ -334,7 +334,7 @@ class HTTP::Headers {
 
     #| Read or write a standard header
     multi method header(HTTP::Header::Standard::Name $name) is rw returns HTTP::Header {
-        self.header-proxy($name);
+        return-rw self.header-proxy($name);
     }
 
     #| Read or write a custom header
@@ -342,7 +342,7 @@ class HTTP::Headers {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
             if !$!quiet && !$quiet && ::("HTTP::Header::$name").defined;
 
-        self.header-proxy($name);
+        return-rw self.header-proxy($name);
     }
 
     #| Remove a header
@@ -448,56 +448,56 @@ class HTTP::Headers {
         }
     }
 
-    method Cache-Control       is rw { self.header(HTTP::Header::Standard::Name::Cache-Control) }
-    method Connection          is rw { self.header(HTTP::Header::Standard::Name::Connection) }
-    method Date                is rw { self.header(HTTP::Header::Standard::Name::Date) }
-    method Pragma              is rw { self.header(HTTP::Header::Standard::Name::Pragma) }
-    method Trailer             is rw { self.header(HTTP::Header::Standard::Name::Trailer) }
-    method Transfer-Encoding   is rw { self.header(HTTP::Header::Standard::Name::Transfer-Encoding) }
-    method Upgrade             is rw { self.header(HTTP::Header::Standard::Name::Upgrade) }
-    method Via                 is rw { self.header(HTTP::Header::Standard::Name::Via) }
-    method Warning             is rw { self.header(HTTP::Header::Standard::Name::Warning) }
+    method Cache-Control       is rw { return-rw self.header(HTTP::Header::Standard::Name::Cache-Control) }
+    method Connection          is rw { return-rw self.header(HTTP::Header::Standard::Name::Connection) }
+    method Date                is rw { return-rw self.header(HTTP::Header::Standard::Name::Date) }
+    method Pragma              is rw { return-rw self.header(HTTP::Header::Standard::Name::Pragma) }
+    method Trailer             is rw { return-rw self.header(HTTP::Header::Standard::Name::Trailer) }
+    method Transfer-Encoding   is rw { return-rw self.header(HTTP::Header::Standard::Name::Transfer-Encoding) }
+    method Upgrade             is rw { return-rw self.header(HTTP::Header::Standard::Name::Upgrade) }
+    method Via                 is rw { return-rw self.header(HTTP::Header::Standard::Name::Via) }
+    method Warning             is rw { return-rw self.header(HTTP::Header::Standard::Name::Warning) }
 
-    method Accept              is rw { self.header(HTTP::Header::Standard::Name::Accept) }
-    method Accept-Charset      is rw { self.header(HTTP::Header::Standard::Name::Accept-Charset) }
-    method Accept-Encoding     is rw { self.header(HTTP::Header::Standard::Name::Accept-Encoding) }
-    method Accept-Langauge     is rw { self.header(HTTP::Header::Standard::Name::Accept-Language) }
-    method Authorization       is rw { self.header(HTTP::Header::Standard::Name::Authorization) }
-    method Cookie              is rw { self.header(HTTP::Header::Standard::Name::Cookie) }
-    method Expect              is rw { self.header(HTTP::Header::Standard::Name::Expect) }
-    method From                is rw { self.header(HTTP::Header::Standard::Name::From) }
-    method Host                is rw { self.header(HTTP::Header::Standard::Name::Host) }
-    method If-Match            is rw { self.header(HTTP::Header::Standard::Name::If-Match) }
-    method If-Modified-Since   is rw { self.header(HTTP::Header::Standard::Name::If-Modified-Since) }
-    method If-None-Match       is rw { self.header(HTTP::Header::Standard::Name::If-None-Match) }
-    method If-Range            is rw { self.header(HTTP::Header::Standard::Name::If-Range) }
-    method If-Unmodified-Since is rw { self.header(HTTP::Header::Standard::Name::If-Unmodified-Since) }
-    method Max-Forwards        is rw { self.header(HTTP::Header::Standard::Name::Max-Forwards) }
-    method Proxy-Authorization is rw { self.header(HTTP::Header::Standard::Name::Proxy-Authorization) }
-    method Range               is rw { self.header(HTTP::Header::Standard::Name::Range) }
-    method Referer             is rw { self.header(HTTP::Header::Standard::Name::Referer) }
-    method TE                  is rw { self.header(HTTP::Header::Standard::Name::TE) }
-    method User-Agent          is rw { self.header(HTTP::Header::Standard::Name::User-Agent) }
+    method Accept              is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept) }
+    method Accept-Charset      is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Charset) }
+    method Accept-Encoding     is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Encoding) }
+    method Accept-Langauge     is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Language) }
+    method Authorization       is rw { return-rw self.header(HTTP::Header::Standard::Name::Authorization) }
+    method Cookie              is rw { return-rw self.header(HTTP::Header::Standard::Name::Cookie) }
+    method Expect              is rw { return-rw self.header(HTTP::Header::Standard::Name::Expect) }
+    method From                is rw { return-rw self.header(HTTP::Header::Standard::Name::From) }
+    method Host                is rw { return-rw self.header(HTTP::Header::Standard::Name::Host) }
+    method If-Match            is rw { return-rw self.header(HTTP::Header::Standard::Name::If-Match) }
+    method If-Modified-Since   is rw { return-rw self.header(HTTP::Header::Standard::Name::If-Modified-Since) }
+    method If-None-Match       is rw { return-rw self.header(HTTP::Header::Standard::Name::If-None-Match) }
+    method If-Range            is rw { return-rw self.header(HTTP::Header::Standard::Name::If-Range) }
+    method If-Unmodified-Since is rw { return-rw self.header(HTTP::Header::Standard::Name::If-Unmodified-Since) }
+    method Max-Forwards        is rw { return-rw self.header(HTTP::Header::Standard::Name::Max-Forwards) }
+    method Proxy-Authorization is rw { return-rw self.header(HTTP::Header::Standard::Name::Proxy-Authorization) }
+    method Range               is rw { return-rw self.header(HTTP::Header::Standard::Name::Range) }
+    method Referer             is rw { return-rw self.header(HTTP::Header::Standard::Name::Referer) }
+    method TE                  is rw { return-rw self.header(HTTP::Header::Standard::Name::TE) }
+    method User-Agent          is rw { return-rw self.header(HTTP::Header::Standard::Name::User-Agent) }
 
-    method Accept-Ranges       is rw { self.header(HTTP::Header::Standard::Name::Accept-Ranges) }
-    method Age                 is rw { self.header(HTTP::Header::Standard::Name::Age) }
-    method ETag                is rw { self.header(HTTP::Header::Standard::Name::ETag) }
-    method Location            is rw { self.header(HTTP::Header::Standard::Name::Location) }
-    method Proxy-Authenticate  is rw { self.header(HTTP::Header::Standard::Name::Proxy-Authenticate) }
-    method Retry-After         is rw { self.header(HTTP::Header::Standard::Name::Retry-After) }
-    method Server              is rw { self.header(HTTP::Header::Standard::Name::Server) }
-    method Set-Cookie          is rw { self.header(HTTP::Header::Standard::Name::Set-Cookie) }
-    method Vary                is rw { self.header(HTTP::Header::Standard::Name::Vary) }
-    method WWW-Authenticate    is rw { self.header(HTTP::Header::Standard::Name::WWW-Authenticate) }
+    method Accept-Ranges       is rw { return-rw self.header(HTTP::Header::Standard::Name::Accept-Ranges) }
+    method Age                 is rw { return-rw self.header(HTTP::Header::Standard::Name::Age) }
+    method ETag                is rw { return-rw self.header(HTTP::Header::Standard::Name::ETag) }
+    method Location            is rw { return-rw self.header(HTTP::Header::Standard::Name::Location) }
+    method Proxy-Authenticate  is rw { return-rw self.header(HTTP::Header::Standard::Name::Proxy-Authenticate) }
+    method Retry-After         is rw { return-rw self.header(HTTP::Header::Standard::Name::Retry-After) }
+    method Server              is rw { return-rw self.header(HTTP::Header::Standard::Name::Server) }
+    method Set-Cookie          is rw { return-rw self.header(HTTP::Header::Standard::Name::Set-Cookie) }
+    method Vary                is rw { return-rw self.header(HTTP::Header::Standard::Name::Vary) }
+    method WWW-Authenticate    is rw { return-rw self.header(HTTP::Header::Standard::Name::WWW-Authenticate) }
 
-    method Allow               is rw { self.header(HTTP::Header::Standard::Name::Allow) }
-    method Content-Encoding    is rw { self.header(HTTP::Header::Standard::Name::Content-Encoding) }
-    method Content-Language    is rw { self.header(HTTP::Header::Standard::Name::Content-Language) }
-    method Content-Length      is rw { self.header(HTTP::Header::Standard::Name::Content-Length) }
-    method Content-Location    is rw { self.header(HTTP::Header::Standard::Name::Content-Location) }
-    method Content-MD5         is rw { self.header(HTTP::Header::Standard::Name::Content-MD5) }
-    method Content-Range       is rw { self.header(HTTP::Header::Standard::Name::Content-Range) }
-    method Content-Type        is rw { self.header(HTTP::Header::Standard::Name::Content-Type) }
-    method Expires             is rw { self.header(HTTP::Header::Standard::Name::Expires) }
-    method Last-Modified       is rw { self.header(HTTP::Header::Standard::Name::Last-Modified) }
+    method Allow               is rw { return-rw self.header(HTTP::Header::Standard::Name::Allow) }
+    method Content-Encoding    is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-Encoding) }
+    method Content-Language    is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-Language) }
+    method Content-Length      is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-Length) }
+    method Content-Location    is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-Location) }
+    method Content-MD5         is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-MD5) }
+    method Content-Range       is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-Range) }
+    method Content-Type        is rw { return-rw self.header(HTTP::Header::Standard::Name::Content-Type) }
+    method Expires             is rw { return-rw self.header(HTTP::Header::Standard::Name::Expires) }
+    method Last-Modified       is rw { return-rw self.header(HTTP::Header::Standard::Name::Last-Modified) }
 }

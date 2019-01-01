@@ -1,3 +1,8 @@
+{{$NEXT}}
+
+    * Bugfix: Added missing return-rw statements when returning values from is
+      rw methods.
+
 v0.2    2018-07-27
 
     * PR #11: Fixes missing `is rw` declarations. (HT: @AlexDaniel)
