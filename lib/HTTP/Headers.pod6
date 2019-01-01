@@ -132,6 +132,12 @@ This removes all headers.
 
 This performs a deep clone of the object.
 
+=head2 method sorted-headers
+
+    method sorted-headers(HTTP::Headers:D: --> Seq)
+
+Returns all L<HTTP::Header> objcts in a sequence sorted by header name.
+
 =head2 method list
 
     method list
@@ -156,11 +162,11 @@ Returns the headers for output using the given line separator. If no line separa
 
 This calls L</method as-string> with the given arguments.
 
-=head2 method for-PSGI
+=head2 method for-P6WAPI
 
-    method for-PSGI returns List
+    method for-P6WAPI(HTTP::Headers:D: --> List:D)
 
-This returns the headers formatted for output from a PSGI application, as an array of Pairs.
+This returns the headers formatted for output from a P6WAPI application, as an array of Pairs.
 
 =head1 Hash-like Operations
 

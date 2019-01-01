@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+    * COMPATIBILITY BREAKING: Added type checking to methods. I do not know that
+      this breaks compatibility, but it probably does.
+    * Deprecation: for-PSGI is now deprecated
+    * Modernized the documentation.
+
 v0.3.0	2019-01-01
 
     * Bugfix: Added missing return-rw statements when returning values from is

@@ -33,8 +33,8 @@ role HTTP::Header {
     my @moy = <Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec>;
 
     #| Convert objects stored into appropriately formatted strings
-    method prepared-values {
-        do for @!values -> $value is copy {
+    method prepared-values(HTTP::Header:D: --> Seq) {
+        @!values.map(-> $value is copy {
             given $value {
                 when Instant {
                     $value = DateTime.new($value);
@@ -53,20 +53,20 @@ role HTTP::Header {
             }
 
             $value;
-        }
+        });
     }
 
     #| Treat the values of this header as a single value
-    method value is rw {
+    method value(HTTP::Header:D: --> Str) is rw {
         my $self = self;
         return-rw Proxy.new(
             FETCH => method ()     { $self.prepared-values.join(', ') },
-            STORE => method ($new) { $self.values = $new },
+            STORE => method ($new) { ~($self.values = $new) },
         );
     }
 
     #| Retrieve the primary value out of the header value
-    method primary is rw {
+    method primary(HTTP::Header:D: --> Str) is rw {
         my $self = self;
         return-rw Proxy.new(
             FETCH => method () {
@@ -389,10 +389,10 @@ class HTTP::Headers {
     }
 
     #| Return the headers as a sorted list
-    method sorted-headers {
+    method sorted-headers(HTTP::Headers:D: --> Seq) {
         self.vacuum;
 
-        %!headers.values.sort: -> $a, $b {
+        %!headers.values.sort(-> $a, $b {
             given $a.name {
                 when HTTP::Header::Standard::Name {
                     given $b.name {
@@ -407,10 +407,10 @@ class HTTP::Headers {
                     }
                 }
             }
-        }
+        })
     }
 
-    method for(&code) is DEPRECATED('the .flatmap() method') {
+    method for(&code) is DEPRECATED("'map'") {
         # DEPRECATED WITHIN RAKUDO!!!
         self.sorted-headers.for: &code;
     }
@@ -420,15 +420,15 @@ class HTTP::Headers {
     }
 
     #| Iterate over the headers in sorted order
-    method flatmap(&code) is DEPRECATED("'map'") {
-        self.sorted-headers.flatmap: &code;
+    method flatmap(&code) is DEPRECATED("'map' with 'flat'") {
+        self.sorted-headers.map: &code;
     }
 
     #| Output the headers as a string in sorted order
     method as-string(Str :$eol = "\n") {
         self.vacuum;
 
-        my $string = join $eol, self.flatmap: -> $header {
+        my $string = join $eol, self.sorted-headers.map: -> $header {
             $header.as-string(:$eol);
         };
 
@@ -440,21 +440,20 @@ class HTTP::Headers {
     multi method Str(Str :$eol = "\n") { self.as-string(:$eol) }
 
     #| Return the headers as a list of Pairs for use with PSGI
-    method for-PSGI {
-        # Should be deprecated...
-        self.for-P6SGI;
+    method for-PSGI is DEPRECATED("'for-P6WAPI'") {
+        self.for-P6WAPI;
     }
 
     method for-P6SGI is DEPRECATED("'for-P6WAPI'") {
         self.for-P6WAPI;
     }
 
-    method for-P6WAPI {
-        self.flatmap: -> $h {
+    method for-P6WAPI(HTTP::Headers:D: --> List:D) {
+        self.sorted-headers.map(-> $h {
             do for $h.prepared-values -> $v {
                 ~$h.name => ~$v
             }
-        }
+        }).flat.list
     }
 
     method Cache-Control       is rw { return-rw self.header(HTTP::Header::Standard::Name::Cache-Control) }

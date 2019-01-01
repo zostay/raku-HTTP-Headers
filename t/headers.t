@@ -108,7 +108,7 @@ is-deeply([ $h.list».name ], [
     "Zoo",
 ]);
 
-is-deeply([ $h.for-PSGI ], [
+is-deeply([ $h.for-P6WAPI ], [
     'Date' => 'today',
     'User-Agent' => 'libwww-perl',
     'ETag' => 'abc',

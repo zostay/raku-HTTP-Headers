@@ -14,7 +14,7 @@
 
     $headers.Allow = 'GET', 'POST';
     $headers.Allow.push: 'PUT', 'DELETE';
-    
+
     $headers.Content-Length.init(42);
 
 =end SYNOPSIS
@@ -45,7 +45,7 @@ This is a stringified, lowercase version of the header name.
 
     has @.values is rw
 
-At the core of a header is simply the list of values stored. Most headers only store a single value. According to RFC, only headers that can be set to comma-separated values are allowed to have multiple values. As such, when a single value is requested (e.g., see the C<method value>), these values will be joined together using a comma. 
+At the core of a header is simply the list of values stored. Most headers only store a single value. According to RFC, only headers that can be set to comma-separated values are allowed to have multiple values. As such, when a single value is requested (e.g., see the C<method value>), these values will be joined together using a comma.
 
     $headers.Allow = "GET", "POST";
     say $headers.Allow.value;
@@ -59,7 +59,7 @@ Normally, however, these values will generate one header line each using the sam
 
 =head2 method value
 
-    method value is rw
+    method value(HTTP::Header:D: --> Str) is rw
 
 Forces the header to operate as a single value. It can be used safely for reading and writing.
 
@@ -176,7 +176,7 @@ This is B<experimental> and might be removed or changed in the future.
 
 =head2 method prepared-values
 
-    method prepared-values
+    method prepared-values(HTTP::Header:D: --> Seq)
 
 Some headers may be set to values that are more easily dealt with as other kinds of values. For example, a C<Date> header might be most conveniently set from a L<DateTime> or L<Instant> object. Similarly, a C<Retry-After> column could be set to those or to a L<Duration>. Any header can be set to one of these values. When the value is output via L</value> or L</list> or L</as-string>, etc., the value will be converted to an appropriate string.
 
@@ -196,14 +196,14 @@ B<NOTE:> See the L</Caveats> for details on possible interactions between these 
 
 =head2 method primary
 
-    method primary is rw
+    method primary(HTTP::Header:D: --> Str) is rw
 
 Returns the primary value of the header. Certain headers, such as C<Content-Type> allow for a main value followed by parameters. This grabs the main value only.
 
     $headers.Content-Type = "text/html; charset=UTF-8";
     say $headers.Content-Type.primary;
     # text/html
-    
+
     $headers.Content-Type.primary = "text/xml";
     say ~$headers.Content-Type;
     # text/xml; charset=UTF-8
@@ -232,7 +232,7 @@ Provides a convenient way to write the parameters of a header.
     $headers.Content-Type.param("charset") = "ISO-8859-1";
     say $headers.as-string;
     # Content-Type: text/html; charset=ISO-8859-1
-    
+
 Setting the value to an undefined value will delete the parameter.
 
     $headers.Content-Type.param("charset") = Nil;
