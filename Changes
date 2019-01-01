@@ -4,6 +4,8 @@
       this breaks compatibility, but it probably does.
     * Deprecation: for-PSGI is now deprecated
     * Modernized the documentation.
+    * Removed custom clone methods that had been put into the header objects. I
+      am not sure why these were added and they did not seem necesssary.
 
 v0.3.0	2019-01-01
 

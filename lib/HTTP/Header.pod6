@@ -280,9 +280,11 @@ Performs the conversion of the header value to a number and then adds the given 
 
 When the header's name is C<Content-Type>, some additional methods have been provided for your convenience.
 
+Note that the C<is-*> checks here are heuristic in nature and might vary from your expectations on what they mean.
+
 =head2 method charset
 
-    method charset is rw
+    method charset(HTTP::Header::Standard::Content-Type:D: --> Str) is rw
 
 This is a convenient shortcut to the "charset" parameter.
 
@@ -293,21 +295,27 @@ This is a convenient shortcut to the "charset" parameter.
 
 =head2 method is-text
 
-    method is-text returns Bool
+    method is-text(HTTP::Header::Standard::Content-Type:D: --> Bool:D)
 
 Returns a true value if the C<Content-Type> is set to a text MIME type.
 
 =head2 method is-html
 
-    method is-html returns Bool
+    method is-html(HTTP::Header::Standard::Content-Type:D: --> Bool:D)
 
 Returns a true value if the C<Content-Type> is set to an HTML MIME type.
 
 =head2 method is-xhtml
 
-    method is-xhtml returns Bool
+    method is-xhtml(HTTP::Header::Standard::Content-Type:D: --> Bool:D)
 
 Returns a true value if the C<Content-Type> is set to an XHTML MIME type.
+
+=head2 method is-xml
+
+    method is-xml(HTTP::Header::Standard::Content-Type:D: --> Bool:D)
+
+Returns C<True> if the C<Content-Type> is set to an XML MIME type.
 
 =head1 Caveats
 

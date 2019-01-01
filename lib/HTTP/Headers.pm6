@@ -91,7 +91,7 @@ role HTTP::Header {
 
     #| Retrieve all the parameters associated with this header value
     method params(HTTP::Header:D: --> Hash:D) {
-        my %result;
+        my Str:D %result;
         my @pairs = try { self.prepared-values».comb(/ <-[ ; ]>+ /)».grep(/'='/).flat };
         for @pairs -> $pair {
             my ($key, $value) = $pair.split('=', 2);
@@ -129,7 +129,7 @@ role HTTP::Header {
     }
 
     #| Read/write a parameter set within a value
-    method param(HTTP::Header:D: Str:D $name) is rw {
+    method param(HTTP::Header:D: Str:D $name --> Str) is rw {
         my $self = self;
         return-rw Proxy.new(
             FETCH => method ()     { $self.params{$name} },
@@ -177,31 +177,25 @@ role HTTP::Header {
 }
 
 multi infix:<+> (HTTP::Header:D $h, Numeric:D() $v) {
-    $h + $v;
+    $h.Numeric + $v;
 }
 
 #| A standard header definition
 class HTTP::Header::Standard does HTTP::Header {
     has HTTP::Header::Standard::Name $.name;
-
-    method clone {
-        my HTTP::Header::Standard $obj .= new(:$!name);
-        $obj.values = @.values;
-        $obj;
-    }
 }
 
 #| A Content-Type header definition
 role HTTP::Header::Standard::Content-Type {
-    method is-text { ?(self.primary ~~ /^ "text/" /) } #= True if the Content-Type is text/*
-    method is-html { self.primary eq 'text/html' || self.is-xhtml } #= True if Content-Type is text/html or .is-xhtml
-    method is-xhtml { #= True if Content-Type is xhtml
+    method is-text(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { ?(self.primary ~~ /^ "text/" /) } #= True if the Content-Type is text/*
+    method is-html(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { self.primary eq 'text/html' || self.is-xhtml } #= True if Content-Type is text/html or .is-xhtml
+    method is-xhtml(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { #= True if Content-Type is xhtml
         ?(self.primary ~~ any(<
             application/xhtml+xml
             application/vnd.wap.xhtml+xml
         >));
     }
-    method is-xml { #= True if Content-Type is xml
+    method is-xml(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { #= True if Content-Type is xml
         ?(self.primary ~~ any(<
             text/xml
             application/xml
@@ -209,18 +203,12 @@ role HTTP::Header::Standard::Content-Type {
     }
 
     #| Read or write the charset parameter
-    method charset is rw { return-rw self.param('charset') }
+    method charset(HTTP::Header::Standard::Content-Type:D: --> Str) is rw { return-rw self.param('charset') }
 }
 
 #| A custom header definition
 class HTTP::Header::Custom does HTTP::Header {
     has Str $.name;
-
-    method clone {
-        my HTTP::Header::Custom $obj .= new(:$!name);
-        $obj.values = @.values;
-        $obj;
-    }
 }
 
 #! A group of headers
