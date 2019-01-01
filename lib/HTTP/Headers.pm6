@@ -440,7 +440,11 @@ class HTTP::Headers {
         self.for-P6SGI;
     }
 
-    method for-P6SGI {
+    method for-P6SGI is DEPRECATED("'for-P6WAPI'") {
+        self.for-P6WAPI;
+    }
+
+    method for-P6WAPI {
         self.flatmap: -> $h {
             do for $h.prepared-values -> $v {
                 ~$h.name => ~$v
