@@ -37,7 +37,7 @@ This is the name of the header being manipulated. It is immutable. The name may 
 
 =head2 method key
 
-    method key returns Str
+    method key(HTTP::Header:D: --> Str:D)
 
 This is a stringified, lowercase version of the header name.
 
@@ -73,7 +73,7 @@ Forces the header to operate as a single value. It can be used safely for readin
 
 =head2 method push
 
-    method push(*@values)
+    method push(HTTP::Header:D: *@values)
 
 This method may be used to push additional values onto the end of the list of values already added to the header.
 
@@ -84,7 +84,7 @@ This method may be used to push additional values onto the end of the list of va
 
 =head2 method unshift
 
-    method unshift(*@values)
+    method unshift(HTTP::Header:D: *@values)
 
 This method may be used to shift additional values onto the start of the list of values.
 
@@ -95,7 +95,7 @@ This method may be used to shift additional values onto the start of the list of
 
 =head2 method shift
 
-    method shift
+    method shift(HTTP::Header:D: --> Any)
 
 Removes the first element from the values associated with this header and returns it.
 
@@ -105,7 +105,7 @@ Removes the first element from the values associated with this header and return
 
 =head2 method pop
 
-    method pop
+    method pop(HTTP::Header:D: --> Any)
 
 Removes the last element from the values associated with this header and returns it.
 
@@ -115,7 +115,7 @@ Removes the last element from the values associated with this header and returns
 
 =head2 method init
 
-    method init(*@values)
+    method init(HTTP::Header:D: *@values)
 
 Sets the values list for this header to the given values if and only if no values have been set yet.
 
@@ -129,7 +129,7 @@ Sets the values list for this header to the given values if and only if no value
 
 =head2 method as-string
 
-    method as-string(Str :$eol = "\n")
+    method as-string(HTTP::Header:D: Str:D :$eol = "\n" --> Str:D)
 
 Returns the header as a string. If there are multiple values, this will output those values separated by C<$eol> with the header name.
 
@@ -142,13 +142,21 @@ Returns the header as a string. If there are multiple values, this will output t
 
 This method is called by the C<as-string> method of L<HTTP::Headers> to output each header.
 
+=head2 method gist
+
+    multi method gist(HTTP::Header:D: --> Str:D)
+
+Returns the same as C<as-string> with no arguments.
+
 =head2 method Bool
 
-    method Bool
+    multi method Bool(HTTP::Header:D: --> Bool:D)
 
 Returns C<True> if there are values set or C<False> otherwise.
 
 =head2 method Str
+
+    multi method Str(HTTP::Header:D: --> Str:D)
 
 This is the same as calling L</method value> to read the value. Note that this is B<not> the same as L</as-string>. The reason for this is just because it makes more sense to have the header stringify to the values in most cases:
 
@@ -158,15 +166,27 @@ This is the same as calling L</method value> to read the value. Note that this i
 
 The parallel between those two statements is more obvious than the alternative.
 
+=head2 method Int
+
+    multi method Int(HTTP::Header:D: --> Int)
+
+This converts the string value of L</method value> into an integer.
+
+=head2 method Numeric
+
+    multi method Numeric(HTTP::Header:D: --> Numeric)
+
+This converts the string value of L</method value> into a number.
+
 =head2 method list
 
-    method list
+    method list(HTTP::Headers:D: --> List:D)
 
-This is a synonym for L</prepared-values>. It returns a finalized version of the values.
+This is a synonym for L</prepared-values>, except that it returns a list instead of a sequence. It returns a finalized version of the values.
 
 =head2 method postcircumfix:<[ ]>
 
-    method postcircumfix:<[ ]>($index)
+    method postcircumfix:<[ ]>(HTTP::Header:D: Int:D $index)
 
 You may use the [] operator to lookup values on the header. Basically, these are synonymous:
 
@@ -210,7 +230,7 @@ Returns the primary value of the header. Certain headers, such as C<Content-Type
 
 =head2 method params
 
-    method params
+    method params(HTTP::Header:D: --> Hash)
 
 Returns all the parameter-like bits in the header as a hash.
 
@@ -220,11 +240,14 @@ Returns all the parameter-like bits in the header as a hash.
 
 =head2 method param
 
-    method param($name) is rw
+    method param(HTTP::Header:D: Str:D $name) is rw
 
-Provides a convenient way to write the parameters of a header.
+Provides a convenient way to read (and write) the parameters of a header.
 
-    $headers.Content-Type = "text/html";
+    $headers.Content-Type = "text/html; charset=latin-1";
+    my $enc = $headers.Content-Type.param('charset');
+    say $enc; # latin-1
+
     $headers.Content-Type.param("charset") = "UTF-8";
     say $headers.as-string;
     # Content-Type: text/html; charset=UTF-8
@@ -238,6 +261,20 @@ Setting the value to an undefined value will delete the parameter.
     $headers.Content-Type.param("charset") = Nil;
     say $headers.as-string;
     # Content-Type: text/html
+
+=head2 method set-param
+
+    method set-param(HTTP::Header:D: Str:D $name, $value)
+
+Sets a parameter on the header. Setting C<$value> to C<Nil> will delete the parameter.
+
+=head2 method infix:<+>
+
+    method infix:<+> (HTTP::Header:D: Numeric:D() $o --> Numeric:D)
+
+Performs the conversion of the header value to a number and then adds the given value to it. This allows the following operation to work as expected:
+
+    $headers.Content-Length += 10;
 
 =head1 Content-Type Convenience Methods
 

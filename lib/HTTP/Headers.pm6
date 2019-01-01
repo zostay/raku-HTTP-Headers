@@ -90,7 +90,7 @@ role HTTP::Header {
     }
 
     #| Retrieve all the parameters associated with this header value
-    method params {
+    method params(HTTP::Header:D: --> Hash:D) {
         my %result;
         my @pairs = try { self.prepared-values».comb(/ <-[ ; ]>+ /)».grep(/'='/).flat };
         for @pairs -> $pair {
@@ -100,8 +100,8 @@ role HTTP::Header {
         %result;
     }
 
-    #| Set a header value on the string (this is semi-internal)
-    method set-param($name, $new-value) {
+    #| Set a header value on the string
+    method set-param(HTTP::Header:D: Str:D $name, $new-value) {
         my $found = False;
         @!values = do for @(self.prepared-values) -> $prep-value {
             my @pairs = try { $prep-value.comb(/ <-[ ; ]>+ /) };
@@ -110,7 +110,7 @@ role HTTP::Header {
                     my ($key, $value) = .split('=', 2);
                     if ($key.trim.lc eq $name.trim.lc) {
                         $found++;
-                        if ($new-value.defined) {
+                        with $new-value {
                             take "{$key.trim}={$new-value.trim}"
                         }
                     }
@@ -129,7 +129,7 @@ role HTTP::Header {
     }
 
     #| Read/write a parameter set within a value
-    method param($name) is rw {
+    method param(HTTP::Header:D: Str:D $name) is rw {
         my $self = self;
         return-rw Proxy.new(
             FETCH => method ()     { $self.params{$name} },
@@ -138,20 +138,20 @@ role HTTP::Header {
     }
 
     #| Read the individual values as an array lookup
-    method AT-POS($index) { @!values[$index] }
+    method AT-POS(HTTP::Header:D: Int:D $index) { @!values[$index] }
 
     # TODO Why can't I make this a stub ... ?
     #method name { } #= The name of the header
 
-    method key returns Str { self.name.lc } #= The header lookup key
+    method key(HTTP::Header:D: --> Str:D) { self.name.lc } #= The header lookup key
 
-    method push(*@values) { @!values.append: @values } #= Push values into the header
-    method unshift(*@values) { @!values.append: @values } #= Unshift values into the header
-    method shift() { @!values.shift } #= Shift values off the header
-    method pop() { @!values.pop } #= Pop values off the header
+    method push(HTTP::Header:D: *@values) { @!values.append: @values } #= Push values into the header
+    method unshift(HTTP::Header:D: *@values) { @!values.append: @values } #= Unshift values into the header
+    method shift(HTTP::Header:D: --> Any) { @!values.shift } #= Shift values off the header
+    method pop(HTTP::Header:D: --> Any) { @!values.pop } #= Pop values off the header
 
     #| Set the given values only if the header has none already
-    method init(*@values) {
+    method init(HTTP::Header:D: *@values) {
         unless @!values {
             @!values = @values;
         }
@@ -161,21 +161,23 @@ role HTTP::Header {
     method remove() { @!values = () }
 
     #| Output the header in Name: Value form for each value
-    method as-string(Str :$eol = "\n") {
+    method as-string(HTTP::Header:D: Str:D :$eol = "\n" --> Str:D) {
         join $eol, do for self.prepared-values -> $value {
             "{self.name.Str}: $value";
         }
     }
 
-    method Bool { ?@!values } #= True if this header has values
-    method Str  { self.value } #= Same as calling .value
-    method Int  { self.value.Int } #= Treat the whole value as an Int
-    method Numeric { self.value.Numeric } #= Treat the whole value as Numeric
-    method list { self.prepared-values } #= Same as calling .prepared-values
+    multi method gist(HTTP::Header:D: --> Str:D) { self.as-string }
+
+    multi method Bool(HTTP::Header:D: --> Bool:D) { ?@!values } #= True if this header has values
+    multi method Str(HTTP::Header:D: --> Str:D)  { self.value } #= Same as calling .value
+    multi method Int(HTTP::Header:D: --> Int)  { self.value.Int } #= Treat the whole value as an Int
+    multi method Numeric(HTTP::Header:D: --> Numeric) { self.value.Numeric } #= Treat the whole value as Numeric
+    multi method list(HTTP::Header:D: --> List:D) { self.prepared-values.list } #= Same as calling .prepared-values
 }
 
-multi infix:<+> (HTTP::Header $h, Numeric $v) {
-    $h.Numeric + $v;
+multi infix:<+> (HTTP::Header:D $h, Numeric:D() $v) {
+    $h + $v;
 }
 
 #| A standard header definition
