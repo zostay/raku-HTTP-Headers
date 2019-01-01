@@ -126,7 +126,6 @@ is-deeply([ $h.for-P6WAPI ], [
 $h2 = $h.clone;
 is($h.as-string, $h2.as-string);
 isnt($h.WHICH, $h2.WHICH);
-isnt($h.internal-headers.WHICH, $h2.internal-headers.WHICH);
 
 $h.remove-content-headers;
 is($h.as-string, q:to/EOT/);

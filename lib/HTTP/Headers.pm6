@@ -216,24 +216,24 @@ class HTTP::Headers {
     has HTTP::Header %!headers; #= Internal header storage... no touchy
     has Bool $.quiet = False; #= Silence all warnings
 
-    method internal-headers() { %!headers }
+    method !internal-headers(--> Hash:D) { %!headers }
 
     #| Initialze headers with a list of pairs
-    multi method new(@headers, Bool :$quiet = False) {
+    multi method new(HTTP::Headers:U: @headers, Bool:D :$quiet = False --> HTTP::Headers:D) {
         my $self = self.bless(:$quiet);
         $self.headers(@headers) if @headers;
         $self;
     }
 
     #| Initialize headers with an array
-    multi method new(%headers, Bool :$quiet = False) {
+    multi method new(HTTP::Headers:U: %headers, Bool:D :$quiet = False --> HTTP::Headers:D) {
         my $self = self.bless(:$quiet);
         $self.headers(%headers) if %headers;
         $self;
     }
 
     #| Initialize headers empty or with a slurpy list of pairs or a slurpy hash
-    multi method new(Bool :$quiet = False, *@headers, *%headers) {
+    multi method new(HTTP::Headers:U: Bool :$quiet = False, *@headers, *%headers --> HTTP::Headers:D) {
         my $self = self.bless(:$quiet);
         $self.headers(%headers) if %headers;
         $self.headers(@headers) if @headers;
@@ -241,7 +241,7 @@ class HTTP::Headers {
     }
 
     #| Set multiple headers from a list of pairs
-    multi method headers(@headers) {
+    multi method headers(HTTP::Headers:D: Pair @headers) {
         my $seen = SetHash.new;
         for flat @headers».kv -> $k, $v {
             if $seen ∋ $k {
@@ -255,14 +255,14 @@ class HTTP::Headers {
     }
 
     #| Set multiple headers from a hash
-    multi method headers(%headers) {
+    multi method headers(HTTP::Headers:D: %headers) {
         for flat %headers.kv -> $k, $v {
             self.header($k) = $v;
         }
     }
 
     #| Set multiple headers from a slurpy list of pairs or slurpy hash
-    multi method headers(*@headers, *%headers) {
+    multi method headers(HTTP::Headers:D: *@headers, *%headers) {
         my $seen = SetHash.new;
         for flat @headers».kv, %headers.kv -> $k, $v {
             if $seen ∋ $k {
@@ -276,7 +276,7 @@ class HTTP::Headers {
     }
 
     #| Helper for building header objects
-    method build-header($name, *@values) returns HTTP::Header {
+    method build-header(HTTP::Headers:D: Any:D $name, *@values --> HTTP::Header:D) {
         my $std-name = $name;
         if $name ~~ Str {
             $std-name = $name.trans('_' => ' ', '-' => ' ').wordcase.trans(' ' => '-');
@@ -297,22 +297,22 @@ class HTTP::Headers {
         }
     }
 
-    method AT-KEY($key)             { self.header($key) } #= use $headers{*} to fetch headers
-    method ASSIGN-KEY($key, $value) { self.header($key) = $value } #= use $headers{*} to set headers
-    method DELETE-KEY($key)         { self.remove-header($key) } #= use $headers{*} :delete to remove headers
-    method EXISTS-KEY($key)         { ?self.header($key) } #= use $headers{*} :exists to test for the existance of a header
+    method AT-KEY(HTTP::Headers:D: Any:D $key --> HTTP::Header)             { self.header($key) } #= use $headers{*} to fetch headers
+    method ASSIGN-KEY(HTTP::Headers:D: Any:D $key, Any:D $value --> HTTP::Header) { self.header($key) = $value } #= use $headers{*} to set headers
+    method DELETE-KEY(HTTP::Headers:D: Any:D $key --> HTTP::Header)         { self.remove-header($key) } #= use $headers{*} :delete to remove headers
+    method EXISTS-KEY(HTTP::Headers:D: Any:D $key --> Bool:D)         { ?self.header($key) } #= use $headers{*} :exists to test for the existance of a header
 
     #| Returns the number of headers set
-    method elems { self.vacuum; %!headers.elems }
+    method elems(HTTP::Headers:D: --> Int:D) { self!vacuum; %!headers.elems }
 
     #| Returns the headers as a sorted list
-    method list { self.sorted-headers }
+    method list(HTTP::Headers:D: --> List:D) { self.sorted-headers.list }
 
     #| Performs a safe deep clone of the headers
-    method clone {
+    method clone(HTTP::Headers:D: --> HTTP::Headers:D) {
         my HTTP::Headers $obj .= new;
         for %!headers.kv -> $k, $v {
-            $obj.internal-headers{$k} = $v.clone;
+            $obj!internal-headers{$k} = $v.clone;
         }
         $obj;
     }
@@ -328,12 +328,12 @@ class HTTP::Headers {
     }
 
     #| Read or write a standard header
-    multi method header(HTTP::Header::Standard::Name $name) is rw returns HTTP::Header {
+    multi method header(HTTP::Headers:D: HTTP::Header::Standard::Name:D $name --> HTTP::Header) is rw {
         return-rw self.header-proxy($name);
     }
 
     #| Read or write a custom header
-    multi method header(Str $name, :$quiet = False) is rw returns HTTP::Header {
+    multi method header(HTTP::Headers:D: Str:D $name, Bool:D :$quiet = False --> HTTP::Header) is rw {
         warn qq{Calling .header($name) is preferred to .header("$name") for standard HTTP headers.}
             if !$!quiet && !$quiet && ::("HTTP::Header::$name").defined;
 
@@ -341,18 +341,18 @@ class HTTP::Headers {
     }
 
     #| Remove a header
-    multi method remove-header($name) {
+    multi method remove-header(HTTP::Headers:D: Any:D $name --> HTTP::Header) {
         my $tmp = self.build-header($name);
         %!headers{$tmp.key} :delete;
     }
 
-    method remove-headers(*@names) {
+    method remove-headers(HTTP::Headers:D: *@names --> List) {
         DEPRECATED('remove-header',|<0.2 1.0>);
         self.remove-header(|@names);
     }
 
     #| Remove more than one header
-    multi method remove-header(*@names) {
+    multi method remove-header(HTTP::Headers:D: *@names --> List) {
         do for @names -> $name {
             my $tmp = self.build-header($name);
             %!headers{$tmp.key} :delete;
@@ -360,7 +360,7 @@ class HTTP::Headers {
     }
 
     #| Remove all the entity and Content-* headers
-    method remove-content-headers {
+    method remove-content-headers(HTTP::Headers:D: --> List) {
         self.remove-header( %!headers.keys.grep(/^ content "-"/), <
             Allow Content-Encoding Content-Language Content-Length
             Content-Location Content-MD5 Content-Range Content-Type
@@ -369,10 +369,10 @@ class HTTP::Headers {
     }
 
     #| Remove all headers
-    method clear { %!headers = () }
+    method clear(HTTP::Headers:D:) { %!headers = () }
 
     #| Clean up header objects that have no values
-    method vacuum {
+    method !vacuum {
         for %!headers.kv -> $k, $v {
             %!headers{$k} :delete if !$v;
         }
@@ -380,7 +380,7 @@ class HTTP::Headers {
 
     #| Return the headers as a sorted list
     method sorted-headers(HTTP::Headers:D: --> Seq) {
-        self.vacuum;
+        self!vacuum;
 
         %!headers.values.sort(-> $a, $b {
             given $a.name {
@@ -400,23 +400,23 @@ class HTTP::Headers {
         })
     }
 
-    method for(&code) is DEPRECATED("'map'") {
+    method for(HTTP::Headers:D: &code) is DEPRECATED("'map'") {
         # DEPRECATED WITHIN RAKUDO!!!
         self.sorted-headers.for: &code;
     }
 
-    method map(&code) {
+    method map(HTTP::Headers:D: &code --> Seq) {
         self.sorted-headers.map: &code;
     }
 
     #| Iterate over the headers in sorted order
-    method flatmap(&code) is DEPRECATED("'map' with 'flat'") {
+    method flatmap(HTTP::Headers:D: &code) is DEPRECATED("'map' with 'flat'") {
         self.sorted-headers.map: &code;
     }
 
     #| Output the headers as a string in sorted order
-    method as-string(Str :$eol = "\n") {
-        self.vacuum;
+    method as-string(HTTP::Headers:D: Str :$eol = "\n" --> Str) {
+        self!vacuum;
 
         my $string = join $eol, self.sorted-headers.map: -> $header {
             $header.as-string(:$eol);
@@ -430,11 +430,11 @@ class HTTP::Headers {
     multi method Str(Str :$eol = "\n") { self.as-string(:$eol) }
 
     #| Return the headers as a list of Pairs for use with PSGI
-    method for-PSGI is DEPRECATED("'for-P6WAPI'") {
+    method for-PSGI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-P6WAPI'") {
         self.for-P6WAPI;
     }
 
-    method for-P6SGI is DEPRECATED("'for-P6WAPI'") {
+    method for-P6SGI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-P6WAPI'") {
         self.for-P6WAPI;
     }
 
