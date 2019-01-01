@@ -287,7 +287,7 @@ class HTTP::Headers {
             $std-name = $name.trans('_' => ' ', '-' => ' ').wordcase.trans(' ' => '-');
         }
 
-        if ::("HTTP::Header::$std-name") -> $std {
+        with ::("HTTP::Header::$std-name") -> $std {
             my $h = HTTP::Header::Standard.new(:name($std), :@values);
             if $std ~~ HTTP::Header::Standard::Name::Content-Type {
                 $h but HTTP::Header::Standard::Content-Type;

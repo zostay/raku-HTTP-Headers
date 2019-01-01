@@ -2,6 +2,8 @@
 
     * Bugfix: Added missing return-rw statements when returning values from is
       rw methods.
+    * Bugfix: Cache-Control header was unusuable because a test for truth should
+      have been a test for definedness during header construction.
     * Added documentation regarding the downside of overusing Proxy for building
       mutators in Perl 6.
 
