@@ -1,38 +1,38 @@
 {
-  "version": "0.3.0",
-  "source-url": "git://github.com/zostay/p6-HTTP-Headers.git",
-  "license": "Artistic-2.0",
+  "provides": {
+    "HTTP::Header::Standard": "lib/HTTP/Headers.pm6",
+    "HTTP::Header": "lib/HTTP/Headers.pm6",
+    "HTTP::Header::Standard::Content-Type": "lib/HTTP/Headers.pm6",
+    "HTTP::Headers": "lib/HTTP/Headers.pm6",
+    "HTTP::Header::Custom": "lib/HTTP/Headers.pm6"
+  },
+  "meta-version": "0",
+  "resources": [
+    
+  ],
   "depends": [
     
   ],
+  "perl": "6.c",
+  "license": "Artistic-2.0",
+  "authors": [
+    "Andrew Sterling Hanenkamp"
+  ],
+  "source-url": "git://github.com/zostay/p6-HTTP-Headers.git",
   "tags": [
+    
+  ],
+  "test-depends": [
     
   ],
   "name": "HTTP::Headers",
   "auth": null,
-  "resources": [
-    
-  ],
   "support": {
     "source": null
   },
-  "provides": {
-    "HTTP::Header::Standard::Content-Type": "lib/HTTP/Headers.pm6",
-    "HTTP::Header::Custom": "lib/HTTP/Headers.pm6",
-    "HTTP::Headers": "lib/HTTP/Headers.pm6",
-    "HTTP::Header": "lib/HTTP/Headers.pm6",
-    "HTTP::Header::Standard": "lib/HTTP/Headers.pm6"
-  },
-  "test-depends": [
-    
-  ],
-  "description": "Tools for working with HTTP message headers",
-  "meta-version": "0",
   "build-depends": [
     
   ],
-  "authors": [
-    "Andrew Sterling Hanenkamp"
-  ],
-  "perl": "6.c"
+  "version": "0.4.0",
+  "description": "Tools for working with HTTP message headers"
 }
