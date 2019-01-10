@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+    * Add Real coercion to headers.
+
 v0.4.0	2019-01-09
 
     * COMPATIBILITY BREAKING: Added type checking to methods. I do not know that

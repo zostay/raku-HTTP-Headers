@@ -173,6 +173,7 @@ role HTTP::Header {
     multi method Str(HTTP::Header:D: --> Str:D)  { self.value } #= Same as calling .value
     multi method Int(HTTP::Header:D: --> Int)  { self.value.Int } #= Treat the whole value as an Int
     multi method Numeric(HTTP::Header:D: --> Numeric) { self.value.Numeric } #= Treat the whole value as Numeric
+    multi method Real(HTTP::Header:D: --> Real:D) { self.value.Real } #= Treat the whole value as a Real
     multi method list(HTTP::Header:D: --> List:D) { self.prepared-values.list } #= Same as calling .prepared-values
 }
 
