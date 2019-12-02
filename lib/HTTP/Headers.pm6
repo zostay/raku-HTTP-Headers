@@ -23,7 +23,7 @@ package HTTP::Header {
         >;
 }
 
-class HTTP::Headers:ver<0.4.0>:auth<github:zostay> { ... }
+class HTTP::Headers:ver<0.5.0>:auth<github:zostay> { ... }
 
 #| Role for defining all header objects
 role HTTP::Header {

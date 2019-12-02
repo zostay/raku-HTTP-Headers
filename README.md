@@ -183,12 +183,12 @@ method Str
 
 This calls [/method as-string](/method as-string) with the given arguments.
 
-method for-P6WAPI
------------------
+method for-WAPI
+---------------
 
-    method for-P6WAPI(HTTP::Headers:D: --> List:D)
+    method for-WAPI(HTTP::Headers:D: --> List:D)
 
-This returns the headers formatted for output from a P6WAPI application, as an array of Pairs.
+This returns the headers formatted for output from a RakuWAPI application, as an array of Pairs.
 
 Hash-like Operations
 ====================
