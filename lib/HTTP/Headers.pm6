@@ -431,15 +431,19 @@ class HTTP::Headers {
     multi method Str(Str :$eol = "\n") { self.as-string(:$eol) }
 
     #| Return the headers as a list of Pairs for use with PSGI
-    method for-PSGI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-P6WAPI'") {
-        self.for-P6WAPI;
+    method for-PSGI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-WAPI'") {
+        self.for-WAPI;
     }
 
-    method for-P6SGI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-P6WAPI'") {
-        self.for-P6WAPI;
+    method for-P6SGI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-WAPI'") {
+        self.for-WAPI;
     }
 
-    method for-P6WAPI(HTTP::Headers:D: --> List:D) {
+    method for-P6WAPI(HTTP::Headers:D: --> List:D) is DEPRECATED("'for-WAPI'") {
+        self.for-WAPI;
+    }
+
+    method for-WAPI(HTTP::Headers:D: --> List:D) {
         self.sorted-headers.map(-> $h {
             do for $h.prepared-values -> $v {
                 ~$h.name => ~$v

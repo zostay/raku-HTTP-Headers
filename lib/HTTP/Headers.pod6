@@ -168,11 +168,11 @@ Returns the headers for output using the given line separator. If no line separa
 
 This calls L</method as-string> with the given arguments.
 
-=head2 method for-P6WAPI
+=head2 method for-WAPI
 
-    method for-P6WAPI(HTTP::Headers:D: --> List:D)
+    method for-WAPI(HTTP::Headers:D: --> List:D)
 
-This returns the headers formatted for output from a P6WAPI application, as an array of Pairs.
+This returns the headers formatted for output from a RakuWAPI application, as an array of Pairs.
 
 =head1 Hash-like Operations
 

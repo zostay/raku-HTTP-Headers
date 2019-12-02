@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+    * Deprecation: for-P6WAPI is now deprecated
+    * Added the for-WAPI method
     * Add Real coercion to headers.
 
 v0.4.0	2019-01-09
