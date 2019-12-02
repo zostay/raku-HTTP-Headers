@@ -1,22 +1,22 @@
 {
   "build-depends": [
-    
+
   ],
   "meta-version": "0",
   "version": "0.5.0",
-  "source-url": "git://github.com/zostay/p6-HTTP-Headers.git",
+  "source-url": "git://github.com/zostay/raku-HTTP-Headers.git",
   "test-depends": [
-    
+
   ],
   "license": "Artistic-2.0",
   "tags": [
-    
+
   ],
   "depends": [
-    
+
   ],
   "resources": [
-    
+
   ],
   "name": "HTTP::Headers",
   "support": {
