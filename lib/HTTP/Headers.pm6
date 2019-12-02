@@ -188,16 +188,16 @@ class HTTP::Header::Standard does HTTP::Header {
 
 #| A Content-Type header definition
 role HTTP::Header::Standard::Content-Type {
-    method is-text(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { ?(self.primary ~~ /^ "text/" /) } #= True if the Content-Type is text/*
-    method is-html(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { self.primary eq 'text/html' || self.is-xhtml } #= True if Content-Type is text/html or .is-xhtml
+    method is-text(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { ?(self.primary.defined && self.primary ~~ /^ "text/" /) } #= True if the Content-Type is text/*
+    method is-html(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { self.primary.defined && self.primary eq 'text/html' || self.is-xhtml } #= True if Content-Type is text/html or .is-xhtml
     method is-xhtml(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { #= True if Content-Type is xhtml
-        ?(self.primary ~~ any(<
+        ?(self.primary.defined && self.primary ~~ any(<
             application/xhtml+xml
             application/vnd.wap.xhtml+xml
         >));
     }
     method is-xml(HTTP::Header::Standard::Content-Type:D: --> Bool:D) { #= True if Content-Type is xml
-        ?(self.primary ~~ any(<
+        ?(self.primary.defined && self.primary ~~ any(<
             text/xml
             application/xml
         >, /"+xml"/));
